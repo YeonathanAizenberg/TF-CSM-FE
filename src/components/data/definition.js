@@ -23,7 +23,7 @@ export default{
         "version": "1",
         "inputs": {
           "title": "text",
-          "url": "text",
+          "url": "image",
         }
       }
     ]

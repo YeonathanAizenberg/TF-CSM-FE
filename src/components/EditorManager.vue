@@ -136,7 +136,6 @@ export default {
         });
       }
     }
-    //4- Fill the default data ofthe inputs with the data from the config js file
   },
 };
 </script>

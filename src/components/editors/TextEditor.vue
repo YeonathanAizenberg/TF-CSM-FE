@@ -68,28 +68,25 @@ export default {
             const editableBlock = document.getElementById(this.blockID);
             const editableBlockChildren = editableBlock.children;
 
-            for (const editableBlockChild of editableBlockChildren) {
-                const type = editableBlockChild.attributes.type?.value;
-                switch (type) {
-                    case "text":
-                        this.currentEditableTextElement = editableBlockChild;
-                        break;
-                    default:
-                        break;
-                }
+            for(const editableBlockChild of editableBlockChildren) {
+                this.currentEditableTextElement = editableBlockChild;
             }
+            //4- Fill the default data ofthe inputs with the data from the config js file
             this.content = this.inputData
         },
 
         saveChangesHandler() {
             // eslint-disable-next-line vue/no-mutating-props
             this.currentEditableTextElement.innerHTML = this.content;
-
             const block = this.currentEditableTextElement.parentElement;
+            console.log("block",block)
 
             const area = block.parentElement;
+            console.log("area",area)
             const areaID = area.attributes.id?.value;
+            console.log("areaID",areaID)
 
+            // How can I know wich element I'm edditing?
             const updateServerContentchange = {
                 areaID,
                 blockID: this.blockID,

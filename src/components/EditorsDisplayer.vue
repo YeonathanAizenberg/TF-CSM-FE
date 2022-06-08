@@ -28,7 +28,6 @@ export default {
     inject: ["editorsPayload"],
     computed: {
         isEditorsPayloadNotEmpty() {
-            console.log("editorsPayload",this.editorsPayload)
             return this.editorsPayload?.length > 0;
         },
     },
