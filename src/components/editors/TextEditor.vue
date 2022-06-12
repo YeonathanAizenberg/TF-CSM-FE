@@ -1,6 +1,6 @@
 <template>
     <div class="text-editor card">
-        <h5 class="my-2">Text Editor</h5>
+        <h5 class="my-2">{{inputSectionName}}</h5>
         <div class="my-2">
             <editor
                 api-key="siyw9azk38h6spg4qrb76x3fwe1do2x3h03va2yneriycrbe"
@@ -20,10 +20,6 @@
                 v-model="content"
             />
         </div>
-
-        <button class="btn btn-primary my-2" @click="saveChangesHandler">
-            Save Changes
-        </button>
     </div>
 </template>
 
@@ -38,7 +34,7 @@ export default {
     data: function () {
         return {
             content: null,
-            currentEditableTextElement: null,
+            // currentEditableTextElement: null,
         };
     },
     props: {
@@ -48,6 +44,11 @@ export default {
         },
 
         inputData: {
+            type: Object,
+            required: true,
+        },
+
+        inputSectionName: {
             type: Object,
             required: true,
         },
@@ -65,41 +66,14 @@ export default {
     },
     methods: {
         onBlockIDChange() {
-            const editableBlock = document.getElementById(this.blockID);
-            const editableBlockChildren = editableBlock.children;
+            // const editableBlock = document.getElementById(this.blockID);
+            // const editableBlockChildren = editableBlock.children;
 
-            for(const editableBlockChild of editableBlockChildren) {
-                this.currentEditableTextElement = editableBlockChild;
-            }
+            // for(const editableBlockChild of editableBlockChildren) {
+            //     this.currentEditableTextElement = editableBlockChild;
+            // }
             //4- Fill the default data ofthe inputs with the data from the config js file
             this.content = this.inputData
-        },
-
-        saveChangesHandler() {
-            // eslint-disable-next-line vue/no-mutating-props
-            this.currentEditableTextElement.innerHTML = this.content;
-            const block = this.currentEditableTextElement.parentElement;
-            console.log("block",block)
-
-            const area = block.parentElement;
-            console.log("area",area)
-            const areaID = area.attributes.id?.value;
-            console.log("areaID",areaID)
-
-            // How can I know wich element I'm edditing?
-            const updateServerContentchange = {
-                areaID,
-                blockID: this.blockID,
-                type: "text",
-                updatedContent: this.content,
-            };
-
-            localStorage.setItem(
-                "updatedBlockContent",
-                JSON.stringify(updateServerContentchange)
-            ); // need to be replaced by an API call
-
-            console.log(updateServerContentchange); //part of task requirement
         },
     },
 };
@@ -110,5 +84,11 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+h5 {
+    text-transform: uppercase;
+    text-decoration: underline;
+    font-weight: 700;
 }
 </style>

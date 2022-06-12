@@ -128,10 +128,12 @@ export default {
       for (let i = 0; i < Object.values(that.formInputs[0]).length; i++) {
         const type = Object.values(that.formInputs[0])[i];
         const data = Object.values(that.formInoutsData)[i];
+        const inputSectionName = Object.keys(that.formInoutsData)[i];
 
         that.editorsPayload.push({
           type,
           data,
+          inputSectionName,
           blockID: editableBlock.id,
         });
       }
