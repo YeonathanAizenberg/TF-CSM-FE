@@ -69,6 +69,8 @@ export default {
 
 <style scoped>
 .sidebar-component {
+    display: flex;
+    flex-direction: column;
     width: 37%;
     position: fixed;
     top: 0;
