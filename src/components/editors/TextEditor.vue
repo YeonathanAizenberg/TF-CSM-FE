@@ -1,6 +1,6 @@
 <template>
     <div class="text-editor card">
-        <h5 class="my-2">{{inputSectionName}}</h5>
+        <h5 class="my-2">{{field.inputSectionName}}</h5>
         <div class="my-2">
             <editor
                 api-key="siyw9azk38h6spg4qrb76x3fwe1do2x3h03va2yneriycrbe"
@@ -14,10 +14,10 @@
                     ],
                     toolbar:
                         'undo redo | formatselect | bold italic backcolor | \
-                         alignleft aligncenter alignright alignjustify | \
-                         bullist numlist outdent indent | removeformat | help',
+                        alignleft aligncenter alignright alignjustify | \
+                        bullist numlist outdent indent | removeformat | help',
                 }"
-                v-model="content"
+                v-model="field.data"
             />
         </div>
     </div>
@@ -31,10 +31,9 @@ export default {
     components: {
         editor: Editor,
     },
-    data: function () {
+        data: function () {
         return {
-            content: null,
-            // currentEditableTextElement: null,
+            // content: this.field.data,
         };
     },
     props: {
@@ -43,37 +42,9 @@ export default {
             required: true,
         },
 
-        inputData: {
+        field: {
             type: Object,
             required: true,
-        },
-
-        inputSectionName: {
-            type: Object,
-            required: true,
-        },
-    },
-    watch: {
-        textContent: function () {
-            this.content = this.textContent;
-        },
-        blockID: function () {
-            this.onBlockIDChange();
-        },
-    },
-    mounted() {
-        this.onBlockIDChange();
-    },
-    methods: {
-        onBlockIDChange() {
-            // const editableBlock = document.getElementById(this.blockID);
-            // const editableBlockChildren = editableBlock.children;
-
-            // for(const editableBlockChild of editableBlockChildren) {
-            //     this.currentEditableTextElement = editableBlockChild;
-            // }
-            //4- Fill the default data ofthe inputs with the data from the config js file
-            this.content = this.inputData
         },
     },
 };

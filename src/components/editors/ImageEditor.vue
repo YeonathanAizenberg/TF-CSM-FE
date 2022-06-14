@@ -82,9 +82,7 @@ export default {
             localStorage.setItem(
                 "updatedBlockContent",
                 JSON.stringify(updateServerContentchange)
-            ); // need to be replaced by an API call
-
-            console.log(updateServerContentchange); //part of task requirement
+            );
 
             this.imageURL = "";
         },

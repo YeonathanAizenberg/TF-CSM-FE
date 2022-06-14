@@ -1,13 +1,13 @@
 <template>
     <div class="editor-displayer-container">
-        <div id="editorDisplayerCarsWrapper" v-if="isEditorsPayloadNotEmpty">
-            <div v-for="editor in editorsPayload" :key="editor.type">
+        <div id="editorDisplayerCarsWrapper" v-if="blockData?.fields">
+            <div v-for="(field, index) in blockData.fields" :key="blockData.blockID + index">
                 <div class="my-2">
-                    <div v-if="editor.type === 'image'">
-                        <image-editor :inputSectionName="editor.inputSectionName" :inputData="editor.data" :blockID="editor.blockID"></image-editor>
+                    <div v-if="field.type === 'image'">
+                        <image-editor :blockID="blockData.blockID" :field="field" ></image-editor>
                     </div>
-                    <div v-if="editor.type === 'text'">
-                        <text-editor :inputSectionName="editor.inputSectionName" :inputData="editor.data" :blockID="editor.blockID"></text-editor>
+                    <div v-if="field.type === 'text'">
+                        <text-editor :blockID="blockData.blockID" :field="field"></text-editor>
                     </div>
                 </div>
             </div>
@@ -21,6 +21,11 @@
 <script>
 import TextEditor from "./editors/TextEditor.vue";
 import ImageEditor from "./editors/ImageEditor.vue";
+import {
+    getConfigData, 
+    getPage,
+    updateConfigData
+} from "../lib/api.js";
 
 export default {
     name: "EditorsDisplayer",
@@ -28,63 +33,94 @@ export default {
         TextEditor,
         ImageEditor,
     },
+    data: function () {
+        return {
+            blockData: null,
+            editorID: null
+        };
+    },
     inject: ["editorsPayload"],
     computed: {
         isEditorsPayloadNotEmpty() {
             return this.editorsPayload?.length > 0;
         },
     },
+
+    watch: {
+        editorsPayload: {
+            handler(newValue) {
+
+                const block = {
+                    blockID: newValue[0].blockID,
+                    fields: []
+                };
+
+                for (let index = 0; index < newValue.length; index++) {
+                    const element = newValue[index];
+
+                    const obj = {
+                        type: element.type,
+                        data: element.data,
+                        inputSectionName: element.inputSectionName,
+                    };
+
+                    block.fields.push(obj);
+                }
+
+                this.blockData = block;
+            },
+        deep: true
+        }
+    },
+
     methods: {
-        saveChangesHandler() {
-            // 1 - Take the selected blockID
-            const currentBlockId = Object.values(this.editorsPayload[0])[3]
-            const currentBlock = document.getElementById(currentBlockId);
+        async saveChangesHandler() {
+            const currentBlockId = this.blockData.blockID
+            let currentBlock = document.getElementById(currentBlockId);
+            const configData = await getConfigData("la-plagne")
 
-            // 2 - Take the children from the blockID
-            const currentBlockChildren = currentBlock.children
+            let newConfigData = []
 
-            // 3 - Take the inputsBlocks
-            // const currentinputBlocks = document.getElementById("editorDisplayerCarsWrapper");
-            // const currentinputBlocksChildren = currentinputBlocks.children
-            const currentBlockInputsIframes = document.getElementsByClassName('tox-edit-area__iframe');
-
-            // 4 - Match the children and the inputBlock by index and change the displayed InnerText
-            for (let i = 0; i < currentBlockInputsIframes.length; i++) {
-                const inputIframeInnerText = Array(currentBlockInputsIframes[i])[0].contentDocument.firstElementChild.innerText
-                currentBlockChildren[i].innerText = inputIframeInnerText
+            for (let i = 0; i < configData.data.areas[0].blocks.length; i++) {
+                if (configData.data.areas[0].blocks[i].id === currentBlockId) {
+                        configData.data.areas[0].blocks[i].data.linkText = this.blockData.fields[2].data
+                        configData.data.areas[0].blocks[i].data.text = this.blockData.fields[1].data
+                        configData.data.areas[0].blocks[i].data.title = this.blockData.fields[0].data
+                }
+                newConfigData = configData
             }
 
-            // 5 - Update the Config in the DB
+            for (let i = 0; i < newConfigData.data.areas[0].blocks.length; i++) {
+                if (newConfigData.data.areas[0].blocks[i].id === currentBlockId) {
+                        if(newConfigData.data.areas[0].blocks[i].data.linkText.includes('<p>')) {
+                            newConfigData.data.areas[0].blocks[i].data.linkText = newConfigData.data.areas[0].blocks[i].data.linkText.split('<p>')[1].split('</p>')[0] 
+                        }
 
-    
-            // eslint-disable-next-line vue/no-mutating-props
-            // console.log("BeforecurrentEditableTextElementBefore",this.currentEditableTextElement)
-            // this.currentEditableTextElement.innerHTML = this.content;
-            // console.log("AftercurrentEditableTextElementAfter",this.currentEditableTextElement)
+                        if(newConfigData.data.areas[0].blocks[i].data.text.includes('<p>')) {
+                            newConfigData.data.areas[0].blocks[i].data.text = newConfigData.data.areas[0].blocks[i].data.text.split('<p>')[1].split('</p>')[0]
+                        }
 
+                        if(newConfigData.data.areas[0].blocks[i].data.title.includes('<p>')) {
+                            newConfigData.data.areas[0].blocks[i].data.title = newConfigData.data.areas[0].blocks[i].data.title.split('<p>')[1].split('</p>')[0]
+                        }
+                }
+            }
 
-            // const block = this.currentEditableTextElement.parentElement;
-            // console.log("block",block)
-            // const area = block.parentElement;
-            // console.log("area",area)
-            // const areaID = area.attributes.id?.value;
+            this.$parent.$emit('yeoni-test');
 
-            // // How can I know wich element I'm edditing?
-            // const updateServerContentchange = {
-            //     areaID,
-            //     blockID: this.blockID,
-            //     type: "text",
-            //     updatedContent: this.content,
-            // };
+            await updateConfigData(newConfigData,"la-plagne")
 
-            // localStorage.setItem(
-            //     "updatedBlockContent",
-            //     JSON.stringify(updateServerContentchange)
-            // ); // need to be replaced by an API call
+            const newHTMLPage = await getPage("la-plagne")
 
-            // console.log(updateServerContentchange); //part of task requirement
+            var newHTMLPageDom = new DOMParser().parseFromString(newHTMLPage.data,"text/html")
+
+            const newHTMLPageBlock = newHTMLPageDom.getElementById(currentBlockId)
+
+            const newHTMLPageBlockChildren = newHTMLPageBlock.children
+
+            currentBlock.replaceChildren(...newHTMLPageBlockChildren)
         },
-    }
+    },
 };
 </script>
 

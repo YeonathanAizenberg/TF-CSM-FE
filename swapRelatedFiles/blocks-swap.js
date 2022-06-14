@@ -66,7 +66,6 @@ function drop(event) {
 
             localStorage.setItem("blocksOrder", JSON.stringify(blocksOrder)); //need to be replaced by an API call. We want to update the database with the new order
 
-            console.log(blocksOrder);
         }
     } else {
         console.log("srcElement or targetElement is null");
