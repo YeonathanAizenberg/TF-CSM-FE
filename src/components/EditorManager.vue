@@ -1,12 +1,16 @@
 <template>
   <div>
-    <sidebar-comp :show="show" @toggleSidebar="toggleSidebarHandler" />
+    <sidebar-comp
+      :show="state.isShow"
+      @toggleSidebar="toggleSidebarHandler"
+      @yeoni-test="yeoniTest"
+    />
   </div>
 </template>
 
 <script>
 import SidebarComp from "./SidebarComp.vue";
-import configFile from "./data/configuration";
+import { getConfigData } from "../lib/api.js";
 import definitionFile from "./data/definition.js";
 
 export default {
@@ -16,61 +20,45 @@ export default {
   },
   data: function () {
     return {
-      show: false,
-      editorsPayload: [],
-      formInputs: [],
-      formInoutsData: {},
-      lastClickedBlock: "",
+      data: {
+        editorsPayload: [],
+        formInputs: {},
+        formInputsData: {},
+        lastClickedBlock: "",
+        configFile: {},
+      },
+      state: {
+        isShow: false
+      },
     };
   },
   provide() {
     return {
-      editorsPayload: this.editorsPayload,
+      editorsPayload: this.data.editorsPayload,
     };
   },
   methods: {
     toggleSidebarHandler() {
-      this.show = !this.show;
+      this.state.isShow = !this.state.isShow;
     },
-  },
-  mounted() {
-    const that = this; //saves the this context of EditorManager component
 
-    const editableBlocks = [];
+    yeoniTest() {
+      alert('VAMOOOOOOO');
+    },
 
-    const areas = document.getElementById("areas").children;
-
-    for (const area of areas) {
-      const blocks = area.children;
-
-      for (const block of blocks) {
-        const id = block.attributes.id?.value;
-        const isIDValid = id && id.length > 0;
-
-        const isEditable = block.attributes.editable?.value;
-        const isEditableValid = isEditable === "true";
-
-        if (isIDValid && isEditableValid) {
-          editableBlocks.push(block);
-        }
+    async getFormInformation(desiredID) {
+      if (Object.keys(this.data.configFile).length === 0) {
+        this.data.configFile = await getConfigData("la-plagne");
       }
-    }
-
-    editableBlocks.forEach((editableBlock) => {
-      editableBlock.addEventListener("click", editableBlockClicked);
-    });
-
-    function getFormInformation(desiredID) {
       //1- Loop over configFile and catch the Type and Version for the block with the desiredID
       let blockType = "";
       let blockVersion = "";
-
-      configFile.data.areas.forEach((area) => {
+      this.data.configFile.data.areas.forEach((area) => {
         area.blocks.forEach((block) => {
           if (block.id === desiredID) {
             blockType = block.type;
             blockVersion = block.version;
-            that.formInoutsData = block.data;
+            this.data.formInputsData = block.data;
           }
         });
       });
@@ -81,41 +69,36 @@ export default {
           definition.type === blockType &&
           definition.version === blockVersion
         ) {
-          if (that.formInputs.length === 0) {
-            that.formInputs.push(definition.inputs);
-          } else {
-            that.formInputs.pop();
-            that.formInputs.push(definition.inputs);
+            this.data.formInputs = definition.inputs;
           }
-        }
       });
-    }
+    },
 
-    function editableBlockClicked(event) {
+    async editableBlockClicked(event) {
       if (event.target.id) {
-        getFormInformation(event.target.id);
+        await this.getFormInformation(event.target.id);
       } else {
-        getFormInformation(event.target.parentElement.id);
+        await this.getFormInformation(event.target.parentElement.id);
       }
 
-      that.show = true;
+      this.state.isShow = true;
 
-      while (that.editorsPayload.length > 0) {
-        that.editorsPayload.pop();
+      while (this.data.editorsPayload.length > 0) {
+        this.data.editorsPayload.pop();
       }
 
-      if (that.lastClickedBlock) {
+      if (this.data.lastClickedBlock) {
         if (event.target.id.split("ID")[0] === "block") {
-          that.lastClickedBlock.classList.remove("currently-clicked-block");
+          this.data.lastClickedBlock.classList.remove("currently-clicked-block");
         } else {
-          that.lastClickedBlock.parentElement.classList.remove(
+          this.data.lastClickedBlock.parentElement.classList.remove(
             "currently-clicked-block"
           );
         }
       }
 
       let editableBlock = event.target;
-      that.lastClickedBlock = editableBlock;
+      this.data.lastClickedBlock = editableBlock;
 
       if (editableBlock.id.split("ID")[0] === "block") {
         editableBlock.classList.add("currently-clicked-block");
@@ -125,17 +108,30 @@ export default {
       }
 
       //3- Put the input types on the form
-      for (let i = 0; i < Object.values(that.formInputs[0]).length; i++) {
-        const type = Object.values(that.formInputs[0])[i];
-        const data = Object.values(that.formInoutsData)[i];
-        const inputSectionName = Object.keys(that.formInoutsData)[i];
 
-        that.editorsPayload.push({
+      for (let i = 0; i < Object.values(this.data.formInputs).length; i++) {
+        const type = Object.values(this.data.formInputs)[i];
+        const data = Object.values(this.data.formInputsData)[i];
+        const inputSectionName = Object.keys(this.data.formInputsData)[i];
+
+        this.data.editorsPayload.push({
           type,
           data,
           inputSectionName,
           blockID: editableBlock.id,
         });
+      }
+    },
+  },
+
+  mounted() {
+    // const this = this; //saves the this context of EditorManager component
+    const areas = document.getElementById("areas").children;
+
+    for (const area of areas) {
+      const blocks = area.children;
+      for (const block of blocks) {
+        block.addEventListener("click", this.editableBlockClicked);
       }
     }
   },
