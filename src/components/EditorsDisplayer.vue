@@ -1,19 +1,22 @@
 <template>
-    <div class="editor-displayer-container">
-        <div id="editorDisplayerCarsWrapper" v-if="blockData?.fields">
-            <div v-for="(field, index) in blockData.fields" :key="blockData.blockID + index">
+    <div v-if="this.state.isLoading">
+        Loading...
+    </div>
+    <div class="editor-displayer-container" v-if="!this.state.isLoading">
+        <div id="editorDisplayerCarsWrapper" v-if="data.blockData?.fields">
+            <div v-for="(field, index) in data.blockData.fields" :key="data.blockData.blockID + index">
                 <div class="my-2">
                     <div v-if="field.type === 'image'">
-                        <image-editor :blockID="blockData.blockID" :field="field" ></image-editor>
+                        <image-editor :blockID="data.blockData.blockID" :field="field" ></image-editor>
                     </div>
                     <div v-if="field.type === 'text'">
-                        <text-editor :blockID="blockData.blockID" :field="field"></text-editor>
+                        <text-editor :blockID="data.blockData.blockID" :field="field"></text-editor>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <button class="btn btn-primary my-2" @click="saveChangesHandler">
+    <button class="btn btn-primary my-2" @click="saveChangesHandler" v-if="!this.state.isLoading">
         Save Changes
     </button>
 </template>
@@ -33,12 +36,18 @@ export default {
         TextEditor,
         ImageEditor,
     },
+
     data: function () {
         return {
-            blockData: null,
-            editorID: null
+            data: {
+                blockData: null,
+            },
+            state: {
+                isLoading: false
+            },
         };
     },
+
     inject: ["editorsPayload"],
     computed: {
         isEditorsPayloadNotEmpty() {
@@ -49,7 +58,6 @@ export default {
     watch: {
         editorsPayload: {
             handler(newValue) {
-
                 const block = {
                     blockID: newValue[0].blockID,
                     fields: []
@@ -67,7 +75,7 @@ export default {
                     block.fields.push(obj);
                 }
 
-                this.blockData = block;
+                this.data.blockData = block;
             },
         deep: true
         }
@@ -75,7 +83,8 @@ export default {
 
     methods: {
         async saveChangesHandler() {
-            const currentBlockId = this.blockData.blockID
+            this.state.isLoading = true
+            const currentBlockId = this.data.blockData.blockID
             let currentBlock = document.getElementById(currentBlockId);
             const configData = await getConfigData("la-plagne")
 
@@ -83,9 +92,9 @@ export default {
 
             for (let i = 0; i < configData.data.areas[0].blocks.length; i++) {
                 if (configData.data.areas[0].blocks[i].id === currentBlockId) {
-                        configData.data.areas[0].blocks[i].data.linkText = this.blockData.fields[2].data
-                        configData.data.areas[0].blocks[i].data.text = this.blockData.fields[1].data
-                        configData.data.areas[0].blocks[i].data.title = this.blockData.fields[0].data
+                        configData.data.areas[0].blocks[i].data.linkText = this.data.blockData.fields[2].data
+                        configData.data.areas[0].blocks[i].data.text = this.data.blockData.fields[1].data
+                        configData.data.areas[0].blocks[i].data.title = this.data.blockData.fields[0].data
                 }
                 newConfigData = configData
             }
@@ -106,7 +115,7 @@ export default {
                 }
             }
 
-            this.$parent.$emit('yeoni-test');
+            this.$parent.$emit('update-config-locally', newConfigData);
 
             await updateConfigData(newConfigData,"la-plagne")
 
@@ -119,6 +128,8 @@ export default {
             const newHTMLPageBlockChildren = newHTMLPageBlock.children
 
             currentBlock.replaceChildren(...newHTMLPageBlockChildren)
+
+            this.state.isLoading = false
         },
     },
 };

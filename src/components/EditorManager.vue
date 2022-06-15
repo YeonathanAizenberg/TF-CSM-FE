@@ -3,7 +3,7 @@
     <sidebar-comp
       :show="state.isShow"
       @toggleSidebar="toggleSidebarHandler"
-      @yeoni-test="yeoniTest"
+      @update-config-locally="updateConfigLocally"
     />
   </div>
 </template>
@@ -42,8 +42,8 @@ export default {
       this.state.isShow = !this.state.isShow;
     },
 
-    yeoniTest() {
-      alert('VAMOOOOOOO');
+    updateConfigLocally(newData) {
+      this.data.configFile = newData
     },
 
     async getFormInformation(desiredID) {
@@ -75,36 +75,36 @@ export default {
     },
 
     async editableBlockClicked(event) {
+      let editableBlock = event.target;
+
       if (event.target.id) {
         await this.getFormInformation(event.target.id);
       } else {
         await this.getFormInformation(event.target.parentElement.id);
       }
-
       this.state.isShow = true;
 
       while (this.data.editorsPayload.length > 0) {
         this.data.editorsPayload.pop();
       }
 
-      if (this.data.lastClickedBlock) {
-        if (event.target.id.split("ID")[0] === "block") {
-          this.data.lastClickedBlock.classList.remove("currently-clicked-block");
-        } else {
-          this.data.lastClickedBlock.parentElement.classList.remove(
-            "currently-clicked-block"
-          );
-        }
-      }
+      // if (this.data.lastClickedBlock) {
+      //   if (event.target.id.split("ID")[0] === "block") {
+      //     this.data.lastClickedBlock.classList.remove("currently-clicked-block");
+      //   } else {
+      //     this.data.lastClickedBlock.parentElement.classList.remove(
+      //       "currently-clicked-block"
+      //     );
+      //   }
+      // }
 
-      let editableBlock = event.target;
       this.data.lastClickedBlock = editableBlock;
 
       if (editableBlock.id.split("ID")[0] === "block") {
-        editableBlock.classList.add("currently-clicked-block");
+        // editableBlock.classList.add("currently-clicked-block");
       } else {
         editableBlock = event.target.parentElement;
-        editableBlock.parentElement.classList.add("currently-clicked-block");
+        // editableBlock.parentElement.classList.add("currently-clicked-block");
       }
 
       //3- Put the input types on the form
