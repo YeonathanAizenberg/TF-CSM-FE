@@ -1,16 +1,17 @@
 <template>
-    <div v-show="show" class="card sidebar-component">
-        <editors-displayer></editors-displayer>
+    <div v-show="isShow" class="card sidebar-component">
+        <editors-displayer v-if="this.isAnyBlockSelected"></editors-displayer>
+        <block-selector v-else></block-selector>
     </div>
 
     <button
         type="button"
         @click="toggleSidebar"
         class="toggle-sidebar btn btn-primary mr-1"
-        :class="{ 'move-toggle-sidebar': show }"
+        :class="{ 'move-toggle-sidebar': isShow }"
     >
         <svg
-            v-if="show"
+            v-if="isShow"
             xmlns="http://www.w3.org/2000/svg"
             width="16"
             height="16"
@@ -43,20 +44,26 @@
 
 <script>
 import EditorsDisplayer from "./EditorsDisplayer.vue";
+import BlockSelector from "./BlockSelector.vue";
 
 export default {
     emits: ["toggleSidebar"],
-    components: { EditorsDisplayer },
+    components: { EditorsDisplayer, BlockSelector },
     name: "SidebarComp",
     props: {
-        show: {
+        isShow: {
+            type: Boolean,
+            required: true,
+        },
+
+        isAnyBlockSelected: {
             type: Boolean,
             required: true,
         },
     },
     computed: {
         toggleIcon() {
-            return this.show ? "bi-arrow-left" : "bi-arrow-right";
+            return this.isShow ? "bi-arrow-left" : "bi-arrow-right";
         },
     },
     methods: {

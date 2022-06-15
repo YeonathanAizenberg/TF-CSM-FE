@@ -1,9 +1,11 @@
 <template>
   <div>
     <sidebar-comp
-      :show="state.isShow"
+      :isShow="state.isShow"
+      :isAnyBlockSelected="state.isAnyBlockSelected"
       @toggleSidebar="toggleSidebarHandler"
       @update-config-locally="updateConfigLocally"
+      @select-block="editableBlockClicked"
     />
   </div>
 </template>
@@ -28,7 +30,8 @@ export default {
         configFile: {},
       },
       state: {
-        isShow: false
+        isShow: true,
+        isAnyBlockSelected: false
       },
     };
   },
@@ -75,6 +78,7 @@ export default {
     },
 
     async editableBlockClicked(event) {
+      this.state.isAnyBlockSelected = true;
       let editableBlock = event.target;
 
       if (event.target.id) {
@@ -125,7 +129,6 @@ export default {
   },
 
   mounted() {
-    // const this = this; //saves the this context of EditorManager component
     const areas = document.getElementById("areas").children;
 
     for (const area of areas) {
