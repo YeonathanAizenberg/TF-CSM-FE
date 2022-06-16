@@ -1,5 +1,5 @@
 <template>
-    <div class="block-refs-wrapper" @click="displayBlcok">
+    <div class="block-refs-wrapper clickable" @click="displayBlcok">
         <div></div>
         <div>{{type}}</div>
         <div>#{{blockID}}</div>
@@ -87,7 +87,7 @@ export default {
         color: gray;
     }
 
-    .block-refs-wrapper:hover {
+    .clickable:hover {
         background-color: #dfe5f6;
         color: #193fa2;
         cursor: pointer;

@@ -1,7 +1,7 @@
 <template>
     <div class="text-editor card">
-        <h5 class="my-2">{{field.inputSectionName}}</h5>
         <div class="my-2">
+        <h5 class="my-2">{{field.inputSectionName}}</h5>
             <textarea
                 id="textInput"
                 name="text-input"
@@ -16,9 +16,7 @@
 
 export default {
     name: "TextEditor",
-    components: {
-        editor: Editor,
-    },
+
         data: function () {
         return {
             // content: this.field.data,
@@ -47,21 +45,29 @@ export default {
 
     h5 {
         text-transform: uppercase;
-        text-decoration: underline;
-        font-weight: 700;
+        font-weight: 600;
         color: black;
+        background-color: #f2f2f3;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 4vw;
+        position: relative;
+        top: 20px;
+        left: 1%;
+        margin-top: 0px;
+        border-radius: 10px;
     }
 
     .text-editor textarea{
         z-index: +1;
         background-color: #f2f2f3;
         border-radius: 5px;
-        margin: 5%;
         padding: 10px 10px;
         border: 1px solid #d3d2d2;
-        resize: none;
-        width: 25vw;
-        height: 100px;
+        max-width: 25vw;
+        min-width: 25vw;
+        min-height: 100px;
         color: gray;
     }
 </style>
