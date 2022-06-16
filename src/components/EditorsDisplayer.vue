@@ -2,6 +2,16 @@
     <div v-if="this.state.isLoading">
         Loading...
     </div>
+    <div class="header-wrapper" v-if="!this.state.isLoading">
+        <button class="btn btn-primary my-2" @click="backToBlockSelector" >
+            Back
+        </button>
+        <div class="block-refs-wrapper">
+            <div></div>
+            <div>TextBorder</div>
+            <div>#{{this.editorsPayload[0].blockID}}</div>
+        </div>
+    </div>
     <div class="editor-displayer-container" v-if="!this.state.isLoading">
         <div id="editorDisplayerCarsWrapper" v-if="data.blockData?.fields">
             <div v-for="(field, index) in data.blockData.fields" :key="data.blockData.blockID + index">
@@ -89,6 +99,10 @@ export default {
         }
     },
 
+    mounted() {
+        console.log("this.editorsPayload",this.editorsPayload)
+    },
+
     methods: {
 
         updateImageLocally(newImageUrl) {
@@ -166,8 +180,25 @@ export default {
 </script>
 
 <style scoped>
+    .header-wrapper{
+        display: flex;
+        flex-direction: row;
+        height: 5%;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
     .editor-displayer-container {
         flex: 1;
         overflow-y: scroll;
+    }
+
+    .block-refs-wrapper {
+        margin: 1%;
+    }
+
+    .block-refs-wrapper:hover {
+        margin: 1%;
+        background-color: #f2f2f3;
     }
 </style>
