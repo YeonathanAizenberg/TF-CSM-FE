@@ -7,7 +7,7 @@
             <div v-for="(field, index) in data.blockData.fields" :key="data.blockData.blockID + index">
                 <div class="my-2">
                     <div v-if="field.type === 'image'">
-                        <image-editor :blockID="data.blockData.blockID" :field="field" ></image-editor>
+                        <image-editor :blockID="data.blockData.blockID" :field="field" @update-image-locally="updateImageLocally"></image-editor>
                     </div>
                     <div v-if="field.type === 'text'">
                         <text-editor :blockID="data.blockData.blockID" :field="field"></text-editor>
@@ -41,11 +41,19 @@ export default {
         return {
             data: {
                 blockData: null,
+                modifiedImageUrl: ""
             },
             state: {
                 isLoading: false
             },
         };
+    },
+
+    props: {
+        editableBlockChildrenClicked: {
+            type: Function,
+            required: false,
+        },
     },
 
     inject: ["editorsPayload"],
@@ -82,6 +90,12 @@ export default {
     },
 
     methods: {
+
+        updateImageLocally(newImageUrl) {
+            // this.data.modifiedImageUrl = newImageUrl
+            console.log('newImageUrl',newImageUrl)
+        },
+
         async saveChangesHandler() {
             this.state.isLoading = true
             const currentBlockId = this.data.blockData.blockID
@@ -92,26 +106,38 @@ export default {
 
             for (let i = 0; i < configData.data.areas[0].blocks.length; i++) {
                 if (configData.data.areas[0].blocks[i].id === currentBlockId) {
+                    if(configData.data.areas[0].blocks[i].type === "borderText") {
                         configData.data.areas[0].blocks[i].data.linkText = this.data.blockData.fields[2].data
                         configData.data.areas[0].blocks[i].data.text = this.data.blockData.fields[1].data
                         configData.data.areas[0].blocks[i].data.title = this.data.blockData.fields[0].data
+                    } else {
+                        configData.data.areas[0].blocks[i].data.title = this.data.blockData.fields[0].data
+                        // configData.data.areas[0].blocks[i].data.url = this.data.modifiedImageUrl
+                        configData.data.areas[0].blocks[i].data.url = "https://picsum.photos/200"
+                    }
                 }
                 newConfigData = configData
             }
 
             for (let i = 0; i < newConfigData.data.areas[0].blocks.length; i++) {
                 if (newConfigData.data.areas[0].blocks[i].id === currentBlockId) {
+                    if(newConfigData.data.areas[0].blocks[i].type === "borderText") {
                         if(newConfigData.data.areas[0].blocks[i].data.linkText.includes('<p>')) {
                             newConfigData.data.areas[0].blocks[i].data.linkText = newConfigData.data.areas[0].blocks[i].data.linkText.split('<p>')[1].split('</p>')[0] 
                         }
-
+    
                         if(newConfigData.data.areas[0].blocks[i].data.text.includes('<p>')) {
                             newConfigData.data.areas[0].blocks[i].data.text = newConfigData.data.areas[0].blocks[i].data.text.split('<p>')[1].split('</p>')[0]
                         }
-
+    
                         if(newConfigData.data.areas[0].blocks[i].data.title.includes('<p>')) {
                             newConfigData.data.areas[0].blocks[i].data.title = newConfigData.data.areas[0].blocks[i].data.title.split('<p>')[1].split('</p>')[0]
                         }
+                    } else {
+                        if(newConfigData.data.areas[0].blocks[i].data.title.includes('<p>')) {
+                            newConfigData.data.areas[0].blocks[i].data.title = newConfigData.data.areas[0].blocks[i].data.title.split('<p>')[1].split('</p>')[0]
+                        }
+                    }
                 }
             }
 
@@ -126,6 +152,10 @@ export default {
             const newHTMLPageBlock = newHTMLPageDom.getElementById(currentBlockId)
 
             const newHTMLPageBlockChildren = newHTMLPageBlock.children
+
+            for (const children of newHTMLPageBlockChildren) {
+                children.addEventListener("click", this.editableBlockChildrenClicked);
+            }
 
             currentBlock.replaceChildren(...newHTMLPageBlockChildren)
 

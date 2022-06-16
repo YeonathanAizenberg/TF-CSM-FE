@@ -1,6 +1,6 @@
 <template>
     <div v-show="isShow" class="card sidebar-component">
-        <editors-displayer v-if="this.isAnyBlockSelected"></editors-displayer>
+        <editors-displayer v-if="this.isAnyBlockSelected" :editableBlockChildrenClicked="editableBlockChildrenClicked"></editors-displayer>
         <block-selector v-else></block-selector>
     </div>
 
@@ -60,7 +60,13 @@ export default {
             type: Boolean,
             required: true,
         },
+
+        editableBlockChildrenClicked: {
+            type: Function,
+            required: false,
+        },
     },
+
     computed: {
         toggleIcon() {
             return this.isShow ? "bi-arrow-left" : "bi-arrow-right";
