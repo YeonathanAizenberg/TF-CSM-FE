@@ -8,7 +8,6 @@
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
-        "@tinymce/tinymce-vue": "^4.0.7",
         "aws-sdk": "^2.1151.0",
         "axios": "^0.27.2",
         "babel-core": "^6.26.3",

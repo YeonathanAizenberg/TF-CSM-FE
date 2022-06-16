@@ -2,21 +2,10 @@
     <div class="text-editor card">
         <h5 class="my-2">{{field.inputSectionName}}</h5>
         <div class="my-2">
-            <editor
-                api-key="siyw9azk38h6spg4qrb76x3fwe1do2x3h03va2yneriycrbe"
-                :init="{
-                    height: 200,
-                    menubar: false,
-                    plugins: [
-                        'advlist autolink lists link image charmap print preview anchor',
-                        'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code help wordcount',
-                    ],
-                    toolbar:
-                        'undo redo | formatselect | bold italic backcolor | \
-                        alignleft aligncenter alignright alignjustify | \
-                        bullist numlist outdent indent | removeformat | help',
-                }"
+            <textarea
+                id="textInput"
+                name="text-input"
+                type="text"
                 v-model="field.data"
             />
         </div>
@@ -24,7 +13,6 @@
 </template>
 
 <script>
-import Editor from "@tinymce/tinymce-vue";
 
 export default {
     name: "TextEditor",
@@ -51,15 +39,29 @@ export default {
 </script>
 
 <style scoped>
-.text-editor {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+    .text-editor {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-h5 {
-    text-transform: uppercase;
-    text-decoration: underline;
-    font-weight: 700;
-}
+    h5 {
+        text-transform: uppercase;
+        text-decoration: underline;
+        font-weight: 700;
+        color: black;
+    }
+
+    .text-editor textarea{
+        z-index: +1;
+        background-color: #f2f2f3;
+        border-radius: 5px;
+        margin: 5%;
+        padding: 10px 10px;
+        border: 1px solid #d3d2d2;
+        resize: none;
+        width: 25vw;
+        height: 100px;
+        color: gray;
+    }
 </style>

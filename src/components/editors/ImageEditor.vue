@@ -1,8 +1,8 @@
 <template>
     <div class="image-editor card">
-        <h5 class="my-2">Image Editor</h5>
+        <h5 class="my-2">Image Selector</h5>
         <div class="my-2">
-            <label class="mr-2" for="ImageURL">Image URL</label>
+            <label class="mr-2" for="ImageURL">Image URL: </label>
             <input
                 id="ImageURL"
                 name="ImageURL"
@@ -28,22 +28,27 @@ export default {
             type: String,
             required: true,
         },
+
+        field: {
+            type: Object,
+            required: true,
+        },
     },
+
     data() {
         return {
+            // https://picsum.photos/200
             imageURL: "",
             currentEditableImageElement: null,
         };
     },
     watch: {
-        currentEditableImageElement: function () {
-            this.imageURL = "";
-        },
         blockID: function () {
             this.onBlockIDChange();
         },
     },
     mounted() {
+        this.imageURL = this.field.data
         this.onBlockIDChange();
     },
     methods: {
@@ -51,40 +56,15 @@ export default {
             const editableBlock = document.getElementById(this.blockID);
             const editableBlockChildren = editableBlock.children;
 
-            for (const editableBlockChild of editableBlockChildren) {
-                const type = editableBlockChild.attributes.type?.value;
-                switch (type) {
-                    case "image":
-                        this.currentEditableImageElement = editableBlockChild;
-                        break;
-                    default:
-                        break;
-                }
-            }
+            this.currentEditableImageElement = editableBlockChildren[1];
         },
+
         updateImgToDOM() {
             const picDOMElement = this.currentEditableImageElement.children[0];
 
             picDOMElement.src = this.imageURL;
 
-            const block = this.currentEditableImageElement.parentElement;
-
-            const area = block.parentElement;
-            const areaID = area.attributes.id?.value;
-
-            const updateServerContentchange = {
-                areaID,
-                blockID: this.blockID,
-                type: "image",
-                updatedContent: this.imageURL,
-            };
-
-            localStorage.setItem(
-                "updatedBlockContent",
-                JSON.stringify(updateServerContentchange)
-            );
-
-            this.imageURL = "";
+            this.$emit('update-image-locally', this.imageURL);
         },
     },
 };
@@ -95,5 +75,27 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 5%;
+}
+
+.image-editor button {
+    margin: 2%;
+}
+
+.image-editor label {
+    margin-right: 5px;
+    color: black;
+}
+
+.image-editor input {
+    margin-right: 5px;
+    color: gray;
+}
+
+.image-editor h5 {
+    text-transform: uppercase;
+    text-decoration: underline;
+    font-weight: 700;
+    color: black;
 }
 </style>

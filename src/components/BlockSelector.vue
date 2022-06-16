@@ -38,5 +38,8 @@ export default {
 </script>
 
 <style >
-
+    .blocks-refs-container {
+        flex: 1;
+        overflow-y: scroll;
+    }
 </style>

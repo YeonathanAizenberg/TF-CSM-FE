@@ -2,6 +2,7 @@
   <div>
     <sidebar-comp
       :isShow="state.isShow"
+      :editableBlockChildrenClicked="this.editableBlockChildrenClicked"
       :isAnyBlockSelected="state.isAnyBlockSelected"
       @toggleSidebar="toggleSidebarHandler"
       @update-config-locally="updateConfigLocally"
@@ -26,7 +27,6 @@ export default {
         editorsPayload: [],
         formInputs: {},
         formInputsData: {},
-        lastClickedBlock: "",
         configFile: {},
       },
       state: {
@@ -50,10 +50,11 @@ export default {
     },
 
     async getFormInformation(desiredID) {
+      // Getting config information from the DB (getConfigData) and organizing it
       if (Object.keys(this.data.configFile).length === 0) {
         this.data.configFile = await getConfigData("la-plagne");
       }
-      //1- Loop over configFile and catch the Type and Version for the block with the desiredID
+
       let blockType = "";
       let blockVersion = "";
       this.data.configFile.data.areas.forEach((area) => {
@@ -66,7 +67,6 @@ export default {
         });
       });
 
-      //2- Call the definition json to get the filds input types
       definitionFile.data.definitions.forEach((definition) => {
         if (
           definition.type === blockType &&
@@ -77,42 +77,52 @@ export default {
       });
     },
 
-    async editableBlockClicked(event) {
-      this.state.isAnyBlockSelected = true;
-      let editableBlock = event.target;
+    editableBlockChildrenClicked(event) {
+      // Making sure the editableBlockClicked works porprelly even when you click on the Block Children
+      event.stopPropagation()
+      const parentBlockId =  {target: {id: event.target.parentElement.id}}
+      this.editableBlockClicked(parentBlockId)
+    },
 
-      if (event.target.id) {
-        await this.getFormInformation(event.target.id);
+    async editableBlockClicked(event) {
+      // Getting the element with the "currently-selected-block" class and the Block we are working on right now
+      const currentlySelectedBlock = document.getElementsByClassName("currently-selected-block")
+      const currentlyInteractabledBlock = document.getElementById(event.target.id)
+      let editableBlock;
+
+      // Making sure we selected a Block
+      this.state.isAnyBlockSelected = true;
+
+      // Scroll the page to the Block we are working on
+      currentlyInteractabledBlock.scrollIntoView({behavior: "smooth", block: "center"})
+
+      // Making sure we are interacting on the Block, and not over one of his children
+      if (event.target.id.split("ID")[0] === "block") {
+        editableBlock = event.target;
       } else {
-        await this.getFormInformation(event.target.parentElement.id);
+        editableBlock = event.target.parentElement;
       }
+
+      // Getting Block information
+      await this.getFormInformation(editableBlock.id);
+
+      // Open the side bar
       this.state.isShow = true;
 
+      // Making sure we are working with the information from only one block 
       while (this.data.editorsPayload.length > 0) {
         this.data.editorsPayload.pop();
       }
 
-      // if (this.data.lastClickedBlock) {
-      //   if (event.target.id.split("ID")[0] === "block") {
-      //     this.data.lastClickedBlock.classList.remove("currently-clicked-block");
-      //   } else {
-      //     this.data.lastClickedBlock.parentElement.classList.remove(
-      //       "currently-clicked-block"
-      //     );
-      //   }
-      // }
+      // Changing the selected Block CSS style
+      if(currentlySelectedBlock.length > 0) {
+          currentlySelectedBlock[0].classList.remove("currently-selected-block");
+          currentlyInteractabledBlock.classList.add("currently-selected-block");
+        } else {
+          currentlyInteractabledBlock.classList.add("currently-selected-block");
+        }
 
-      this.data.lastClickedBlock = editableBlock;
-
-      if (editableBlock.id.split("ID")[0] === "block") {
-        // editableBlock.classList.add("currently-clicked-block");
-      } else {
-        editableBlock = event.target.parentElement;
-        // editableBlock.parentElement.classList.add("currently-clicked-block");
-      }
-
-      //3- Put the input types on the form
-
+      // Puting the Block information on the editorsPayload
       for (let i = 0; i < Object.values(this.data.formInputs).length; i++) {
         const type = Object.values(this.data.formInputs)[i];
         const data = Object.values(this.data.formInputsData)[i];
@@ -129,14 +139,20 @@ export default {
   },
 
   mounted() {
+    // Giving to the Blocks and Block Children the event they need to triger when clicked 
     const areas = document.getElementById("areas").children;
 
     for (const area of areas) {
       const blocks = area.children;
       for (const block of blocks) {
         block.addEventListener("click", this.editableBlockClicked);
+        const blocksChildren = block.children;
+        for (const children of blocksChildren) {
+          children.addEventListener("click", this.editableBlockChildrenClicked);
+        }
       }
     }
+
   },
 };
 </script>
@@ -146,7 +162,8 @@ export default {
   cursor: pointer;
 }
 
-.currently-clicked-block {
-  border: 3px solid blue;
+.currently-selected-block {
+  border: 3px solid #1C5D9F;
+  border-radius: 5px;
 }
 </style>
