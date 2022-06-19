@@ -6,6 +6,8 @@
                 id="textInput"
                 name="text-input"
                 type="text"
+                @input="resize()"
+                ref="textarea"
                 v-model="field.data"
             />
         </div>
@@ -33,6 +35,21 @@ export default {
             required: true,
         },
     },
+
+    methods: {
+        resize() {
+            let element = this.$refs["textarea"];
+
+            element.style.height = element.scrollHeight + "px";
+        },
+    },
+
+    mounted() { 
+        let element = this.$refs["textarea"];
+
+        element.style.height = "40px";
+        element.style.height = element.scrollHeight + "px";
+    }
 };
 </script>
 
@@ -44,7 +61,7 @@ export default {
     }
 
     h5 {
-        text-transform: uppercase;
+        text-transform: capitalize;
         font-weight: 600;
         color: black;
         background-color: #f2f2f3;
@@ -63,11 +80,19 @@ export default {
         z-index: +1;
         background-color: #f2f2f3;
         border-radius: 5px;
-        padding: 10px 10px;
+        padding: 10px;
         border: 1px solid #d3d2d2;
         max-width: 25vw;
         min-width: 25vw;
-        min-height: 100px;
         color: gray;
+        overflow:hidden;
+        resize: none;
+    }
+
+    .text-editor textarea:focus{
+        color: #193fa2;
+        outline: 1px solid #63a1ff;
+        border-color: #63a1ff;
+        background-color: #dfe5f6;
     }
 </style>

@@ -8,8 +8,8 @@
         </button>
         <div class="block-refs-wrapper">
             <div></div>
-            <div>TextBorder</div>
-            <div>#{{this.editorsPayload[0].blockID}}</div>
+            <div>{{this.editorsPayload[0]?.blockRefType}}</div>
+            <div>#{{this.editorsPayload[0]?.blockID}}</div>
         </div>
     </div>
     <div class="editor-displayer-container" v-if="!this.state.isLoading">
@@ -99,11 +99,11 @@ export default {
         }
     },
 
-    mounted() {
-        console.log("this.editorsPayload",this.editorsPayload)
-    },
-
     methods: {
+
+        backToBlockSelector() {
+            this.$parent.$emit('unselect-block');
+        },
 
         updateImageLocally(newImageUrl) {
             // this.data.modifiedImageUrl = newImageUrl

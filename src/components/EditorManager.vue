@@ -4,6 +4,7 @@
       :isShow="state.isShow"
       :editableBlockChildrenClicked="this.editableBlockChildrenClicked"
       :isAnyBlockSelected="state.isAnyBlockSelected"
+      @unselect-block="unselectingBlock"
       @toggleSidebar="toggleSidebarHandler"
       @update-config-locally="updateConfigLocally"
       @select-block="editableBlockClicked"
@@ -28,6 +29,7 @@ export default {
         formInputs: {},
         formInputsData: {},
         configFile: {},
+        blockRefType: ""
       },
       state: {
         isShow: true,
@@ -47,6 +49,10 @@ export default {
 
     updateConfigLocally(newData) {
       this.data.configFile = newData
+    },
+
+    unselectingBlock() {
+      this.state.isAnyBlockSelected = false
     },
 
     async getFormInformation(desiredID) {
@@ -73,6 +79,7 @@ export default {
           definition.version === blockVersion
         ) {
             this.data.formInputs = definition.inputs;
+            this.data.blockRefType = definition.type;
           }
       });
     },
@@ -127,8 +134,10 @@ export default {
         const type = Object.values(this.data.formInputs)[i];
         const data = Object.values(this.data.formInputsData)[i];
         const inputSectionName = Object.keys(this.data.formInputsData)[i];
+        const blockRefType = this.data.blockRefType;
 
         this.data.editorsPayload.push({
+          blockRefType,
           type,
           data,
           inputSectionName,
