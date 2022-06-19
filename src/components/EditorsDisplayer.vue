@@ -47,6 +47,11 @@ export default {
         ImageEditor,
     },
 
+    emits:[
+        'unselect-block', 
+        'update-config-locally'
+        ],
+
     data: function () {
         return {
             data: {
@@ -181,6 +186,7 @@ export default {
 
 <style scoped>
     .header-wrapper{
+        z-index: +1;
         display: flex;
         flex-direction: row;
         height: 5%;

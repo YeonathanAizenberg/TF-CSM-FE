@@ -12,10 +12,10 @@
   </div>
 </template>
 
-<script>
+<script scoped>
 import SidebarComp from "./SidebarComp.vue";
 import { getConfigData } from "../lib/api.js";
-import definitionFile from "./data/definition.js";
+import definitionFile from "../data/definition.js";
 
 export default {
   name: "EditorManager",
