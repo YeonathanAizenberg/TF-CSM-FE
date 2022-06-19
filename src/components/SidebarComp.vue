@@ -47,9 +47,13 @@ import EditorsDisplayer from "./EditorsDisplayer.vue";
 import BlockSelector from "./BlockSelector.vue";
 
 export default {
-    emits: ["toggleSidebar"],
     components: { EditorsDisplayer, BlockSelector },
     name: "SidebarComp",
+
+    emits: [
+        "toggleSidebar"
+        ],
+
     props: {
         isShow: {
             type: Boolean,

@@ -1,15 +1,31 @@
 <template>
+    <main-modal v-if="this.state.isShowModal" title="Add Section" @close="closeModal">
+        <template #default>
+            <p>Test</p>
+        </template>
+    </main-modal>
     <div class="block-refs-wrapper clickable" @click="displayBlcok">
         <div></div>
         <div>{{type}}</div>
         <div>#{{blockID}}</div>
     </div>
+    <div class="add-new-block-ref-wrapper">
+        <div class="add-new-block-ref clickable" @click="openAddNewBlockModal">
+            +
+        </div>
+    </div>
 </template>
 
 <script>
+import MainModal from './MainModal.vue';
 
 export default {
+    components: { MainModal },
     name: "BlockRef",
+
+    emits:[
+        'select-block'
+        ],
 
     data: function () {
         return {
@@ -21,7 +37,7 @@ export default {
                     }
                 },
             state: {
-
+                isShowModal: false,
             },
         };
     },
@@ -41,6 +57,14 @@ export default {
     methods: {
         displayBlcok() {
             this.$parent.$parent.$emit('select-block', this.data.event);
+        },
+
+        openAddNewBlockModal() {
+            this.state.isShowModal = true
+        },
+
+        closeModal() {
+            this.state.isShowModal = false
         }
     },
 
@@ -58,7 +82,7 @@ export default {
         justify-content: flex-start;
         align-items: center;
         border-radius: 5px;
-        margin: 5%;
+        margin: 0 5%;
         padding: 10px 10px;
         min-height: 40px;
     }
@@ -90,6 +114,29 @@ export default {
         background-color: #dfe5f6;
         color: #193fa2;
         cursor: pointer;
+    }
+
+    .add-new-block-ref-wrapper {
+        height: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .add-new-block-ref-wrapper:hover .add-new-block-ref{
+        display: flex;
+    }
+
+    .add-new-block-ref {
+        display: none;
+        border: 3px solid white;
+        background-color: #dfe5f6;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        height: 30px;
+        width: 30px;
+        font-size: xx-large;
     }
 
     @media only screen and (max-width: 700px){

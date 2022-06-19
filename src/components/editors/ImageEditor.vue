@@ -35,6 +35,10 @@ export default {
         },
     },
 
+    emits: [
+        'update-image-locally'
+    ],
+
     data() {
         return {
             // https://picsum.photos/200

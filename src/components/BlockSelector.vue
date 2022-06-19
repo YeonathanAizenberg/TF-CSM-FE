@@ -7,7 +7,7 @@
     </div>
 </template>
 
-<script>
+<script scoped>
 import { getConfigData } from '@/lib/api';
 import BlockRef from "./BlockRef.vue";
 
