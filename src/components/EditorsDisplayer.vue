@@ -20,7 +20,7 @@
                         <image-editor :blockID="data.blockData.blockID" :field="field" @update-image-locally="updateImageLocally"></image-editor>
                     </div>
                     <div v-if="field.type === 'text'">
-                        <text-editor :blockID="data.blockData.blockID" :field="field"></text-editor>
+                        <text-editor :blockID="data.blockData.blockID" :field="field" @update-area-with-preview="updateAreaWithPreview"></text-editor>
                     </div>
                 </div>
             </div>
@@ -35,10 +35,12 @@
 import TextEditor from "./editors/TextEditor.vue";
 import ImageEditor from "./editors/ImageEditor.vue";
 import {
+    generatePage,
     getConfigData, 
     getPage,
     updateConfigData
 } from "../lib/api.js";
+import { addEventListeners, scrollToselectedtBlock } from '@/utils/utils';
 
 export default {
     name: "EditorsDisplayer",
@@ -56,7 +58,8 @@ export default {
         return {
             data: {
                 blockData: null,
-                modifiedImageUrl: ""
+                modifiedImageUrl: "",
+                editorsPayloadNewBlock: null
             },
             state: {
                 isLoading: false
@@ -65,13 +68,24 @@ export default {
     },
 
     props: {
+        editableBlockClicked: {
+            type: Function,
+            required: false,
+        },
+
         editableBlockChildrenClicked: {
             type: Function,
+            required: false,
+        },
+
+        configFile: {
+            type: Object,
             required: false,
         },
     },
 
     inject: ["editorsPayload"],
+
     computed: {
         isEditorsPayloadNotEmpty() {
             return this.editorsPayload?.length > 0;
@@ -81,47 +95,108 @@ export default {
     watch: {
         editorsPayload: {
             handler(newValue) {
-                const block = {
-                    blockID: newValue[0].blockID,
-                    fields: []
-                };
-
-                for (let index = 0; index < newValue.length; index++) {
-                    const element = newValue[index];
-
-                    const obj = {
-                        type: element.type,
-                        data: element.data,
-                        inputSectionName: element.inputSectionName,
-                    };
-
-                    block.fields.push(obj);
-                }
-
-                this.data.blockData = block;
+                console.log("newValue",newValue)
+                this.addBlockData(newValue)
             },
-        deep: true
+        deep: true,
+        },
+    },
+
+    mounted() {
+        // We need it for new block. For the exixting blocks, we have a initial Proxy, so the watch works as it should
+        this.data.editorsPayloadNewBlock = this.editorsPayload
+        if(this.editorsPayload.length > 0) {
+            this.addBlockData(this.data.editorsPayloadNewBlock)
         }
     },
 
     methods: {
+        addBlockData(newValue) {
+            const block = {
+                blockID: newValue[0].blockID,
+                fields: []
+            };
+
+            for (let index = 0; index < newValue.length; index++) {
+                const element = newValue[index];
+                const obj = {
+                    type: element.type,
+                    data: element.data,
+                    inputSectionName: element.inputSectionName,
+                };
+
+                block.fields.push(obj);
+            }
+            this.data.blockData = block;
+        },
 
         backToBlockSelector() {
             this.$parent.$emit('unselect-block');
         },
 
+        async updateAreaWithPreview() {
+            const previewBlockModified = this.data.blockData
+            let previewBlocksConfig = this.configFile
+            let currentBlock;
+
+            // Get the current block
+            for (let i = 0; i < previewBlocksConfig.data.areas[0].blocks.length; i++) {
+                previewBlocksConfig.data.areas[0].blocks[i].id === previewBlockModified.blockID ? 
+                currentBlock = previewBlocksConfig.data.areas[0].blocks[i] : null
+            }
+
+            for (let i = 0; i < previewBlockModified.fields.length; i++) {
+                let currentKey = Object.keys(currentBlock.data)[i]
+                previewBlockModified.fields[i].inputSectionName === currentKey ? 
+                currentBlock.data[currentKey] = previewBlockModified.fields[i].data : null
+            }
+
+            for (let i = 0; i < previewBlocksConfig.data.areas[0].blocks.length; i++) {
+                previewBlocksConfig.data.areas[0].blocks[i].id === previewBlockModified.blockID ?
+                previewBlocksConfig.data.areas[0].blocks[i] = currentBlock : null
+            }
+
+            const previewHTML = await generatePage("la-plagne",previewBlocksConfig)
+            var previewHTMLPageDom = new DOMParser().parseFromString(previewHTML.data,"text/html")
+
+            const previewArea = previewHTMLPageDom.getElementById(currentBlock.id).parentElement;
+
+            let currentArea = document.getElementById(currentBlock.id).parentElement;
+
+            addEventListeners(previewArea, this.editableBlockClicked, this.editableBlockChildrenClicked)
+
+            setTimeout(function(){
+                currentArea.replaceWith(previewArea)
+            }, 1000);
+
+            this.$parent.$emit('update-config-locally', previewBlocksConfig);
+        },
+
         updateImageLocally(newImageUrl) {
             // this.data.modifiedImageUrl = newImageUrl
-            console.log('newImageUrl',newImageUrl)
         },
 
         async saveChangesHandler() {
-            this.state.isLoading = true
             const currentBlockId = this.data.blockData.blockID
-            let currentBlock = document.getElementById(currentBlockId);
             const configData = await getConfigData("la-plagne")
+            this.state.isLoading = true
+            let newBlockMetaData;
+            let newBlockData = {};
+            let currentBlock = document.getElementById(currentBlockId);
 
             let newConfigData = []
+            let isFound = false
+
+            //Checking if it is a New Block
+            for (let area of configData.data.areas) {
+                if (isFound) break
+                for (let block of area.blocks) {
+                    if (isFound) break
+                    if (block.id === currentBlockId) {
+                        isFound = true
+                    } 
+                }
+            }
 
             for (let i = 0; i < configData.data.areas[0].blocks.length; i++) {
                 if (configData.data.areas[0].blocks[i].id === currentBlockId) {
@@ -134,33 +209,31 @@ export default {
                         // configData.data.areas[0].blocks[i].data.url = this.data.modifiedImageUrl
                         configData.data.areas[0].blocks[i].data.url = "https://picsum.photos/200"
                     }
-                }
-                newConfigData = configData
-            }
-
-            for (let i = 0; i < newConfigData.data.areas[0].blocks.length; i++) {
-                if (newConfigData.data.areas[0].blocks[i].id === currentBlockId) {
-                    if(newConfigData.data.areas[0].blocks[i].type === "borderText") {
-                        if(newConfigData.data.areas[0].blocks[i].data.linkText.includes('<p>')) {
-                            newConfigData.data.areas[0].blocks[i].data.linkText = newConfigData.data.areas[0].blocks[i].data.linkText.split('<p>')[1].split('</p>')[0] 
-                        }
-    
-                        if(newConfigData.data.areas[0].blocks[i].data.text.includes('<p>')) {
-                            newConfigData.data.areas[0].blocks[i].data.text = newConfigData.data.areas[0].blocks[i].data.text.split('<p>')[1].split('</p>')[0]
-                        }
-    
-                        if(newConfigData.data.areas[0].blocks[i].data.title.includes('<p>')) {
-                            newConfigData.data.areas[0].blocks[i].data.title = newConfigData.data.areas[0].blocks[i].data.title.split('<p>')[1].split('</p>')[0]
-                        }
-                    } else {
-                        if(newConfigData.data.areas[0].blocks[i].data.title.includes('<p>')) {
-                            newConfigData.data.areas[0].blocks[i].data.title = newConfigData.data.areas[0].blocks[i].data.title.split('<p>')[1].split('</p>')[0]
-                        }
+                } else {
+                    newBlockMetaData = {
+                        "id": this.data.editorsPayloadNewBlock[0].blockID,
+                        "type":this.data.editorsPayloadNewBlock[0].blockRefType,
+                        "version":'1',
+                        "htmlTemplatePath": `../components/${this.data.editorsPayloadNewBlock[0].blockRefType}/${this.data.editorsPayloadNewBlock[0].blockRefType}.ejs`,
+                        "cssPath": `../components/${this.data.editorsPayloadNewBlock[0].blockRefType}/${this.data.editorsPayloadNewBlock[0].blockRefType}.scss`,
+                        "data": {}
                     }
+
+                    for(let i = 0; i < this.data.editorsPayloadNewBlock.length; i++) {
+                        newBlockData[this.data.blockData.fields[i].inputSectionName] = this.data.blockData.fields[i].data
+                    }
+
+                    newBlockMetaData.data = newBlockData
+                    }
+                if (!isFound) {
+                    configData.data.areas[0].blocks.push(newBlockMetaData)
+                    newConfigData = configData
+                    break
+                }else {
+                    newConfigData = configData
                 }
             }
-
-            this.$parent.$emit('update-config-locally', newConfigData);
+            // this.$parent.$emit('update-config-locally', newConfigData);
 
             await updateConfigData(newConfigData,"la-plagne")
 
@@ -170,13 +243,34 @@ export default {
 
             const newHTMLPageBlock = newHTMLPageDom.getElementById(currentBlockId)
 
-            const newHTMLPageBlockChildren = newHTMLPageBlock.children
+            if (!isFound) {
+                const newHTMLPageBlockParent = newHTMLPageBlock.parentElement
+                let currentArea = document.getElementById(newHTMLPageBlockParent.id);
 
-            for (const children of newHTMLPageBlockChildren) {
-                children.addEventListener("click", this.editableBlockChildrenClicked);
+                const newBlocks = newHTMLPageBlockParent.children
+
+                // addEventListener to the BlockId
+                for (const blocks of newBlocks) {
+                    blocks.addEventListener("click", this.editableBlockClicked);
+                }
+
+                // addEventListener to the BlockId children
+                for (let i = 0; i < newBlocks.length; i++) {
+                    for (let j = 0; j < newBlocks[i].children.length; j++) {
+                        newBlocks[i].children[j].addEventListener("click", this.editableBlockChildrenClicked);
+                    }
+                }
+
+                currentArea.replaceWith(newHTMLPageBlockParent)
+            } else {
+                const newHTMLPageBlockChildren = newHTMLPageBlock.children
+
+                for (const children of newHTMLPageBlockChildren) {
+                    children.addEventListener("click", this.editableBlockChildrenClicked);
+                }
+
+                currentBlock.replaceChildren(...newHTMLPageBlockChildren)
             }
-
-            currentBlock.replaceChildren(...newHTMLPageBlockChildren)
 
             this.state.isLoading = false
         },

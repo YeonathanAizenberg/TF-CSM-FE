@@ -32,8 +32,8 @@ export default{
             "id": "blockID3",
             "type":"video",
             "version":'1',
-            "htmlTemplatePath": "../components/videoBox/videoBox.ejs",
-            "cssPath": "../components/videoBox/borderText.scss",
+            "htmlTemplatePath": "../components/imageBox/imageBox.ejs",
+            "cssPath": "../components/imageBox/borderText.scss",
             "data": {
               "title": "EN VIDÉO"
             }

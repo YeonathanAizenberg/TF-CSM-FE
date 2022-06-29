@@ -58,9 +58,10 @@ export default {
     methods: {
         onBlockIDChange() {
             const editableBlock = document.getElementById(this.blockID);
-            const editableBlockChildren = editableBlock.children;
-
-            this.currentEditableImageElement = editableBlockChildren[1];
+            if(editableBlock){
+                const editableBlockChildren = editableBlock.children;
+                this.currentEditableImageElement = editableBlockChildren[1];
+            }
         },
 
         updateImgToDOM() {

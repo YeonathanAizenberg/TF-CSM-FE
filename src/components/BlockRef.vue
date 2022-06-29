@@ -1,30 +1,23 @@
 <template>
-    <main-modal v-if="this.state.isShowModal" title="Add Section" @close="closeModal">
-        <template #default>
-            <p>Test</p>
-        </template>
-    </main-modal>
     <div class="block-refs-wrapper clickable" @click="displayBlcok">
         <div></div>
         <div>{{type}}</div>
         <div>#{{blockID}}</div>
     </div>
     <div class="add-new-block-ref-wrapper">
-        <div class="add-new-block-ref clickable" @click="openAddNewBlockModal">
+        <div class="add-new-block-ref clickable" @click="$emit('open-add-new-block-modal')">
             +
         </div>
     </div>
 </template>
 
 <script>
-import MainModal from './MainModal.vue';
 
 export default {
-    components: { MainModal },
     name: "BlockRef",
 
     emits:[
-        'select-block'
+        'selected-block'
         ],
 
     data: function () {
@@ -56,16 +49,8 @@ export default {
 
     methods: {
         displayBlcok() {
-            this.$parent.$parent.$emit('select-block', this.data.event);
+            this.$parent.$parent.$emit('selected-block', this.data.event, this.type, this.blockID);
         },
-
-        openAddNewBlockModal() {
-            this.state.isShowModal = true
-        },
-
-        closeModal() {
-            this.state.isShowModal = false
-        }
     },
 
     mounted() {
