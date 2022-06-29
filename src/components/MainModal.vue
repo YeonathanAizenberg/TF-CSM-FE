@@ -1,29 +1,33 @@
 <template>
-    <div @click="$emit('close')">
-        <dialog open>
-            <header>
-                <slot name="header">
-                    <span>
-                        <h3>
-                            {{title}}
-                        </h3>
-                        <!-- <search-bar></search-bar> -->
-                    </span>
-                    <button @click="$emit('close')">X</button>
-                </slot>
-            </header>
-            <section>
-                <slot></slot>
-            </section>
-            <menu>
-                <slot name="acitions"></slot>
-            </menu>
-        </dialog>
-    </div>
+    <teleport to="body">
+        <div >
+            <dialog open>
+                <header>
+                    <slot name="header">
+                        <span>
+                            <h3>
+                                {{title}}
+                            </h3>
+                            <!-- <search-bar></search-bar> -->
+                        </span>
+                        <button @click="$emit('close')">X</button>
+                    </slot>
+                </header>
+                <section  v-if="isModalLoading" class="loading">
+                    <slot name="loading"></slot>
+                </section>
+                <section v-else >
+                    <slot ></slot>
+                </section>
+                <menu>
+                    <slot name="acitions"></slot>
+                </menu>
+            </dialog>
+        </div>
+    </teleport>
 </template>
 
 <script scoped>
-
 
 export default {
     name: "MainModal",
@@ -33,36 +37,25 @@ export default {
             type: String,
             required: false,
         },
+
+        isModalLoading: {
+            type: Boolean,
+            required: false,
+        },
     },
 
     emits: [
         'close'
     ],
 
-    components: {
-
-    },
-
-    data: function () {
-        return {
-            data: {
-
-            },
-            state: {
-
-            },
-        };
-    },
-
-    mounted() {
-
-    },
 };
 </script>
 
 <style scoped>
     div {
         position: fixed;
+        display: flex;
+        align-items: center;
         top: 0;
         right: 0;
         bottom: 0;
@@ -70,20 +63,16 @@ export default {
         height: 100vh;
         width: 100%;
         background-color: rgba(0, 0, 0, 0.75);
-        z-index: 10;
+        z-index: 100;
     }
 
     dialog {
-        position: fixed;
-        top: 100px;
-        left: 550px;
-        width: 80%;
+        width: 820px;
         z-index: 100;
         border-radius: 12px;
         border: none;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-        padding: 0;
-        margin: 0;
+        height: 512px;
         overflow: hidden;
     }
 
@@ -104,7 +93,7 @@ export default {
         margin-block-start: 1em;
         margin-block-end: 1em;
         margin-inline-start: 0px;
-        font-weight: 500;
+        font-weight: 600;
     }
 
     button {
@@ -123,7 +112,12 @@ export default {
     }
 
     section {
-        padding: 1rem;
+        height: 83%;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        overflow: auto;
     }
 
     menu {
@@ -133,9 +127,20 @@ export default {
         margin: 0;
     }
 
-    @media (min-width: 768px) {
-        dialog {
-            width: 40%;
-        }
+    .loading {
+        position: absolute;
+        top: 45%;
+        left: 45%;
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #005fa9;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
     }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+}
 </style>

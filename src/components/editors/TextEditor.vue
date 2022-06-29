@@ -36,6 +36,15 @@ export default {
         },
     },
 
+    watch: {
+        field: {
+            handler() {
+                this.$emit('update-area-with-preview')
+            },
+        deep: true,
+        },
+    },
+
     methods: {
         resize() {
             let element = this.$refs["textarea"];

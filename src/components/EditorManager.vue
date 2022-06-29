@@ -3,11 +3,14 @@
     <sidebar-comp
       :isShow="state.isShow"
       :editableBlockChildrenClicked="this.editableBlockChildrenClicked"
+      :editableBlockClicked="this.editableBlockClicked"
       :isAnyBlockSelected="state.isAnyBlockSelected"
+      :configFile="this.data.editedConfigFile"
+      @select-block="selectingBlock"
       @unselect-block="unselectingBlock"
       @toggleSidebar="toggleSidebarHandler"
       @update-config-locally="updateConfigLocally"
-      @select-block="editableBlockClicked"
+      @selected-block="editableBlockClicked"
     />
   </div>
 </template>
@@ -16,6 +19,7 @@
 import SidebarComp from "./SidebarComp.vue";
 import { getConfigData } from "../lib/api.js";
 import definitionFile from "../data/definition.js";
+import { scrollToselectedtBlock } from '@/utils/utils';
 
 export default {
   name: "EditorManager",
@@ -26,10 +30,11 @@ export default {
     return {
       data: {
         editorsPayload: [],
+        blockRefType: "",
         formInputs: {},
         formInputsData: {},
-        configFile: {},
-        blockRefType: ""
+        editedConfigFile: {},
+        initialConfigFile: {}
       },
       state: {
         isShow: true,
@@ -48,7 +53,13 @@ export default {
     },
 
     updateConfigLocally(newData) {
-      this.data.configFile = newData
+      this.data.editedConfigFile = newData
+    },
+
+    selectingBlock(block) {
+      const blockEvent =  {target: {id: block.id}}
+      this.editableBlockClicked(blockEvent,block.type,block.id)
+      this.state.isAnyBlockSelected = true
     },
 
     unselectingBlock() {
@@ -56,32 +67,35 @@ export default {
     },
 
     async getFormInformation(desiredID) {
-      // Getting config information from the DB (getConfigData) and organizing it
-      if (Object.keys(this.data.configFile).length === 0) {
-        this.data.configFile = await getConfigData("la-plagne");
+      // Get information
+      let currentConfiguration;
+      let currentBlock;
+      let currentBlockTypeInputs;
+
+      if(this.data.editedConfigFile?.data?.areas[0]?.blocks) {
+          currentConfiguration = this.data.editedConfigFile;
+      } else {
+        currentConfiguration = this.data.initialConfigFile;
       }
 
-      let blockType = "";
-      let blockVersion = "";
-      this.data.configFile.data.areas.forEach((area) => {
-        area.blocks.forEach((block) => {
-          if (block.id === desiredID) {
-            blockType = block.type;
-            blockVersion = block.version;
-            this.data.formInputsData = block.data;
-          }
-        });
-      });
+      const currentConfigurationBlocks = currentConfiguration.data.areas[0].blocks
 
-      definitionFile.data.definitions.forEach((definition) => {
-        if (
-          definition.type === blockType &&
-          definition.version === blockVersion
-        ) {
-            this.data.formInputs = definition.inputs;
-            this.data.blockRefType = definition.type;
-          }
-      });
+      for (let i = 0; i < currentConfigurationBlocks.length; i++) {
+        if(currentConfigurationBlocks[i].id === desiredID) {
+          currentBlock = currentConfigurationBlocks[i]
+        }
+      }
+
+      for (let i = 0; i < definitionFile.data.definitions.length; i++) {
+        if(definitionFile.data.definitions[i].type === currentBlock.type) {
+          currentBlockTypeInputs = definitionFile.data.definitions[i].inputs
+        }
+      }
+
+      // insert information on the formInputs and formInputsData
+
+      this.data.formInputsData = currentBlock.data
+      this.data.formInputs = currentBlockTypeInputs
     },
 
     editableBlockChildrenClicked(event) {
@@ -92,62 +106,54 @@ export default {
     },
 
     async editableBlockClicked(event) {
-      // Getting the element with the "currently-selected-block" class and the Block we are working on right now
-      const currentlySelectedBlock = document.getElementsByClassName("currently-selected-block")
-      const currentlyInteractabledBlock = document.getElementById(event.target.id)
-      let editableBlock;
+        let editableBlock;
 
-      // Making sure we selected a Block
-      this.state.isAnyBlockSelected = true;
+        this.state.isAnyBlockSelected = true;
 
-      // Scroll the page to the Block we are working on
-      currentlyInteractabledBlock.scrollIntoView({behavior: "smooth", block: "center"})
-
-      // Making sure we are interacting on the Block, and not over one of his children
-      if (event.target.id.split("ID")[0] === "block") {
-        editableBlock = event.target;
-      } else {
-        editableBlock = event.target.parentElement;
-      }
-
-      // Getting Block information
-      await this.getFormInformation(editableBlock.id);
-
-      // Open the side bar
-      this.state.isShow = true;
-
-      // Making sure we are working with the information from only one block 
-      while (this.data.editorsPayload.length > 0) {
-        this.data.editorsPayload.pop();
-      }
-
-      // Changing the selected Block CSS style
-      if(currentlySelectedBlock.length > 0) {
-          currentlySelectedBlock[0].classList.remove("currently-selected-block");
-          currentlyInteractabledBlock.classList.add("currently-selected-block");
+        // Making sure we are interacting on the Block, and not over one of his children
+        if (event.target.id.split("ID")[0] === "block") {
+          editableBlock = event.target;
         } else {
-          currentlyInteractabledBlock.classList.add("currently-selected-block");
+          editableBlock = event.target.parentElement;
         }
 
-      // Puting the Block information on the editorsPayload
-      for (let i = 0; i < Object.values(this.data.formInputs).length; i++) {
-        const type = Object.values(this.data.formInputs)[i];
-        const data = Object.values(this.data.formInputsData)[i];
-        const inputSectionName = Object.keys(this.data.formInputsData)[i];
-        const blockRefType = this.data.blockRefType;
+        // Getting Block information
+        await this.getFormInformation(editableBlock.id);
 
-        this.data.editorsPayload.push({
-          blockRefType,
-          type,
-          data,
-          inputSectionName,
-          blockID: editableBlock.id,
-        });
-      }
+        // Open the side bar
+        this.state.isShow = true;
+
+        // Making sure we are working with the information from only one block 
+        while (this.data.editorsPayload.length > 0) {
+          this.data.editorsPayload.pop();
+        }
+
+        // Puting the Block information on the editorsPayload
+        for (let i = 0; i < Object.values(this.data.formInputs).length; i++) {
+          const type = Object.values(this.data.formInputs)[i];
+          const data = Object.values(this.data.formInputsData)[i];
+          const inputSectionName = Object.keys(this.data.formInputsData)[i];
+          const blockRefType = this.data.blockRefType;
+
+          this.data.editorsPayload.push({
+            blockRefType,
+            type,
+            data,
+            inputSectionName,
+            blockID: editableBlock.id,
+          });
+        }
+
+        // Scroll the page to the Block we are working on
+        scrollToselectedtBlock(event.target.id)
     },
   },
 
-  mounted() {
+  async mounted() {
+    // Bring the data from the DB on the first render
+    this.data.initialConfigFile = await getConfigData("la-plagne")
+    this.data.editedConfigFile = this.data.initialConfigFile
+
     // Giving to the Blocks and Block Children the event they need to triger when clicked 
     const areas = document.getElementById("areas").children;
 
