@@ -10,7 +10,7 @@
                             </h3>
                             <!-- <search-bar></search-bar> -->
                         </span>
-                        <button @click="$emit('close')">X</button>
+                        <button @click="handleClose">X</button>
                     </slot>
                 </header>
                 <section  v-if="isModalLoading" class="loading">
@@ -28,27 +28,20 @@
 </template>
 
 <script scoped>
+    export default {
+        name: "MainModal",
 
-export default {
-    name: "MainModal",
-
-    props: {
-        title: {
-            type: String,
-            required: false,
+        props: {
+            title: String,
+            isModalLoading: Boolean,
         },
 
-        isModalLoading: {
-            type: Boolean,
-            required: false,
-        },
-    },
-
-    emits: [
-        'close'
-    ],
-
-};
+        methods:{
+            handleClose(){
+                this.$emit('close')
+            }
+        }
+    };
 </script>
 
 <style scoped>

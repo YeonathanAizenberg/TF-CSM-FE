@@ -1,4 +1,4 @@
-export default{
+const definitionFile = {
   "data": {
     "definitions": [
       {
@@ -113,3 +113,6 @@ export default{
     ]
   }
 }
+
+Object.freeze(definitionFile)
+export default definitionFile

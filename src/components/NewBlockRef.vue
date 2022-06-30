@@ -10,21 +10,14 @@
 </template>
 
 <script>
-export default {
-    name: "NewBlockRef",
+    export default {
+        name: "NewBlockRef",
 
-    props: {
-        type: {
+        props: {
             type: String,
-            required: true,
+            image: String,
         },
-
-        image: {
-            type: String,
-            required: false,
-        },
-    },
-};
+    };
 </script>
 
 <style scope>

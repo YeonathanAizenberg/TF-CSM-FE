@@ -15,51 +15,44 @@
 </template>
 
 <script>
+    export default {
+        name: "TextEditor",
 
-export default {
-    name: "TextEditor",
+        props: {
+            blockID: String,
+            field: Object,
+        },
 
         data: function () {
-        return {
-            // content: this.field.data,
-        };
-    },
-    props: {
-        blockID: {
-            type: String,
-            required: true,
+            return {
+                // content: this.field.data,
+            };
         },
 
-        field: {
-            type: Object,
-            required: true,
-        },
-    },
-
-    watch: {
-        field: {
-            handler() {
-                this.$emit('update-area-with-preview')
+        watch: {
+            field: {
+                handler() {
+                    this.$emit('update-area-with-preview')
+                },
+            deep: true,
             },
-        deep: true,
         },
-    },
 
-    methods: {
-        resize() {
+        methods: {
+            resize() {
+                let element = this.$refs["textarea"];
+
+                element.style.height = element.scrollHeight + "px";
+            },
+        },
+
+        mounted() { 
             let element = this.$refs["textarea"];
 
+            element.style.height = "40px";
             element.style.height = element.scrollHeight + "px";
-        },
-    },
-
-    mounted() { 
-        let element = this.$refs["textarea"];
-
-        element.style.height = "40px";
-        element.style.height = element.scrollHeight + "px";
-    }
-};
+        }
+    };
 </script>
 
 <style scoped>

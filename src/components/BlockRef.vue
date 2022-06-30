@@ -12,51 +12,40 @@
 </template>
 
 <script>
+    export default {
+        name: "BlockRef",
 
-export default {
-    name: "BlockRef",
+        props: {
+            blockID: String,
+            type: String,
+        },
 
-    emits:[
-        'selected-block'
-        ],
-
-    data: function () {
-        return {
-                data: {
-                    event: {
-                        target: {
-                            id: "",
+        data: function () {
+            return {
+                    data: {
+                        event: {
+                            target: {
+                                id: "",
+                            }
                         }
-                    }
+                    },
+                state: {
+                    isShowModal: false,
                 },
-            state: {
-                isShowModal: false,
+            };
+        },
+
+
+        methods: {
+            displayBlcok() {
+                this.$emit('selected-block-bridge-two', this.data.event);
             },
-        };
-    },
-
-    props: {
-        blockID: {
-            type: String,
-            required: true,
         },
 
-        type: {
-            type: String,
-            required: true,
+        mounted() {
+            this.data.event.target.id = this.blockID
         },
-    },
-
-    methods: {
-        displayBlcok() {
-            this.$parent.$parent.$emit('selected-block', this.data.event, this.type, this.blockID);
-        },
-    },
-
-    mounted() {
-        this.data.event.target.id = this.blockID
-    },
-};
+    };
 </script>
 
 <style >

@@ -1,4 +1,4 @@
-export const scrollToselectedtBlock = (blockID) => {
+const scrollToSelectedBlock = (blockID) => {
     let currentBlock = document.getElementById(blockID);
     const currentlySelectedBlock = document.getElementsByClassName("currently-selected-block")
 
@@ -12,16 +12,4 @@ export const scrollToselectedtBlock = (blockID) => {
     }
 }
 
-export const addEventListeners = (area, eventOne, eventTwo) => {
-    const areaBlocks = area.children
-    for (const blocks of areaBlocks) {
-        blocks.addEventListener("click", eventOne);
-    }
-
-    // addEventListener to the BlockId children
-    for (let i = 0; i < areaBlocks.length; i++) {
-        for (let j = 0; j < areaBlocks[i].children.length; j++) {
-            areaBlocks[i].children[j].addEventListener("click", eventTwo);
-    }
-}
-}
+export default scrollToSelectedBlock

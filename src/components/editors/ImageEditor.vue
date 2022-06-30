@@ -23,21 +23,11 @@
 <script>
 export default {
     name: "ImageEditor",
+
     props: {
-        blockID: {
-            type: String,
-            required: true,
-        },
-
-        field: {
-            type: Object,
-            required: true,
-        },
+        blockID: String,
+        field: Object,
     },
-
-    emits: [
-        'update-image-locally'
-    ],
 
     data() {
         return {
@@ -46,18 +36,16 @@ export default {
             currentEditableImageElement: null,
         };
     },
+
     watch: {
         blockID: function () {
             this.onBlockIDChange();
         },
     },
-    mounted() {
-        this.imageURL = this.field.data
-        this.onBlockIDChange();
-    },
+
     methods: {
         onBlockIDChange() {
-            const editableBlock = document.getElementById(this.blockID);
+            const editableBlock = document.querySelector(`#${this.blockID}`);
             if(editableBlock){
                 const editableBlockChildren = editableBlock.children;
                 this.currentEditableImageElement = editableBlockChildren[1];
@@ -66,11 +54,14 @@ export default {
 
         updateImgToDOM() {
             const picDOMElement = this.currentEditableImageElement.children[0];
-
             picDOMElement.src = this.imageURL;
-
             this.$emit('update-image-locally', this.imageURL);
         },
+    },
+
+    mounted() {
+        this.imageURL = this.field.data
+        this.onBlockIDChange();
     },
 };
 </script>
