@@ -6,34 +6,35 @@
     @close="closeModal"
   >
     <template #default>
+      <template v-if="definitionFile.data.definitions">
       <NewBlockRef
-        v-for="definition in data.definitionFile.data.definitions"
+        v-for="definition in definitionFile.data.definitions"
         :key="definition.type"
         :type="definition.type"
         :image="definition.image"
         @add-new-block="addNewBlock"
       ></NewBlockRef>
+      </template>
     </template>
   </MainModal>
-  <div v-if="this.state.isLoading" class="loading">Loading...</div>
   <div class="blocks-refs-container" v-else>
+    <template v-if="this.configFile?.data?.areas[0].blocks">
     <BlockRef
-      v-for="block in data.configFileBlocks"
+      v-for="block in this.configFile?.data?.areas[0].blocks"
       :key="block.id"
       :blockID="block.id"
       :type="block.type"
       @open-add-new-block-modal="openAddNewBlockModal"
-      @selected-block-bridge-two="selectedBlockBridgeTwo"
+      @block-click="handleBlockClick"
     ></BlockRef>
+    </template>
   </div>
 </template>
 
-<script scoped>
-import getConfigData from "@/lib/getConfigData";
+<script>
 import generatePage from "@/lib/generatePage";
 import BlockRef from "./BlockRef.vue";
 import NewBlockRef from "./NewBlockRef.vue";
-import definitionFile from "../data/definition.js";
 import MainModal from "./MainModal.vue";
 import addClickEventsToBlock from "@/logic/addClickEventsToBlock";
 
@@ -48,20 +49,13 @@ export default {
 
   props: {
     handleFormDataSetUp: Function,
-    newConfigFile: Object,
-    initialDefinitionFile: Object
+    configFile: Object,
+    definitionFile: Object
   },
 
   data: function () {
     return {
-      data: {
-        configFile: {},
-        configFileBlocks: {},
-        definitionFile: {},
-        newBlock: {}
-      },
       state: {
-        isLoading: true,
         isShowModal: false,
         isModalLoading: false,
       },
@@ -69,8 +63,8 @@ export default {
   },
 
   methods: {
-    selectedBlockBridgeTwo(e){
-        this.$emit("selected-block-bridge-one", e)
+    handleBlockClick(e){
+        this.$emit("block-click", e)
     },
 
     openAddNewBlockModal() {
@@ -81,13 +75,13 @@ export default {
       this.state.isShowModal = false;
     },
 
-    setUpNewBlock() {
-      this.data.newBlock = {
+    getEmptyBlock() {
+      return {
         id:
           "blockID" +
           Math.floor(
-            Math.random() * (99 - this.data.configFileBlocks.length + 1) +
-              this.data.configFileBlocks.length +
+            Math.random() * (99 - this.configFile.data.areas[0].blocks.length + 1) +
+              this.configFile.data.areas[0].blocks.length +
               1
           ),
         type: "",
@@ -98,40 +92,38 @@ export default {
       };
     },
 
-    insertNewBlockData(type) {
-      for (const definition of this.data.definitionFile.data.definitions) {
-        if (definition.type === type) {
-          this.data.newBlock.data = definition.inputs;
-          this.data.newBlock.type = definition.type;
-          this.data.newBlock.htmlTemplatePath = `../components/${definition.type}/${definition.type}.ejs`;
-          this.data.newBlock.cssPath = `../components/${definition.type}/${definition.type}.scss`;
-        }
-      }
+    predareEmptyBlock(type, newBlock) {
+      if (!this.definitionFile) return
+      const definition = this.definitionFile.data.definitions.find(definition=>definition.type === type)
+      if (!definition) throw new Error('some error')
+      const definitionCopy = JSON.parse(JSON.stringify(definition))
+      newBlock.data = definitionCopy.inputs;
+      newBlock.type = definitionCopy.type;
+      newBlock.htmlTemplatePath = `../components/${definitionCopy.type}/${definitionCopy.type}.ejs`;
+      newBlock.cssPath = `../components/${definitionCopy.type}/${definitionCopy.type}.scss`;
+      return newBlock
     },
 
-    async updateUIwithNewBlock() {
-      const newBlocks = this.data.configFileBlocks;
-      const newPreviewConfig = this.data.configFile;
+    async updateUIwithNewBlock(newBlock) {
+      const configFileCopy = JSON.parse(JSON.stringify(this.configFile))
+      configFileCopy.data.areas[0].blocks.push(newBlock);
 
-      newPreviewConfig.data.areas[0].blocks = newBlocks;
-
-      const previewHTML = await generatePage("la-plagne", newPreviewConfig);
-      var previewHTMLPageDom = new DOMParser().parseFromString(
+      const previewHTML = await generatePage("la-plagne", configFileCopy);
+      const previewHTMLPageDom = new DOMParser().parseFromString(
         previewHTML.data,
         "text/html"
       );
 
       const previewArea = previewHTMLPageDom.getElementById(
-        this.data.newBlock.id
+        newBlock.id
       ).parentElement;
 
-      let currentArea = document.getElementById(newBlocks[0].id).parentElement;
+      const currentArea = document.getElementById(configFileCopy.data.areas[0].blocks[0].id).parentElement;
 
       addClickEventsToBlock(previewArea, this.handleFormDataSetUp);
-
-      this.$emit("update-config-locally-bridge", newPreviewConfig);
-
-      this.$emit("select-block-bridge", this.data.newBlock);
+      this.$emit("update-config", configFileCopy);
+      this.$emit("select-block-bridge", newBlock);
+      this.$emit("make-save-button-available");
 
       currentArea.replaceWith(previewArea);
     },
@@ -139,37 +131,13 @@ export default {
     addNewBlock(type) {
       this.state.isModalLoading = true;
 
-      this.setUpNewBlock()
-
-      this.insertNewBlockData(type)
-
-      this.data.configFileBlocks.push(this.data.newBlock);
-
-      this.updateUIwithNewBlock()
+      const newBlock = this.getEmptyBlock()
+      const preparedBlock = this.predareEmptyBlock(type, newBlock)
+      this.updateUIwithNewBlock(preparedBlock)
 
       this.state.isModalLoading = false;
       this.state.isShowModal = false;
     },
-
-    async bringInitialData() {
-      // TODO the definitionFile should come from the props
-      this.data.definitionFile = definitionFile
-
-      if (this.newConfigFile?.data?.areas[0]?.blocks) {
-        this.data.configFile = this.newConfigFile;
-      } else {
-        // TODO the configFile should come from the props
-        this.data.configFile = await getConfigData("la-plagne");
-      }
-
-      this.data.configFileBlocks = this.data.configFile.data.areas[0].blocks;
-    }
-  },
-
-    mounted() {
-      this.bringInitialData()
-
-      this.state.isLoading = false;
   },
 };
 </script>

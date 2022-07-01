@@ -6,154 +6,165 @@
       :isAnyBlockSelected="state.isAnyBlockSelected"
       :configFile="data.editedConfigFile"
       :editorsPayload="data.editorsPayload"
-      :initialDefinitionFile="data.initialDefinitionFile"
+      :definitionFile="data.definitionFile"
+      :isEdited="isEdited"
       @select-block="selectingBlock"
       @unselect-block="unselectingBlock"
       @toggleSidebar="toggleSidebarHandler"
-      @update-config-locally="updateConfigLocally"
+      @update-config="updateConfig"
       @selected-block="handleFormDataSetUp"
     />
   </div>
 </template>
 
 <script scoped>
-  import SidebarComp from "./SidebarComp.vue";
-  import getConfigData from "../lib/getConfigData";
-  import definitionFile from "../data/definition.js";
-  import scrollToSelectedBlock from '@/logic/scrollToSelectedBlock.js';
-  import addClickEventsToBlock from '@/logic/addClickEventsToBlock';
+import SidebarComp from "./SidebarComp.vue";
+import getConfigData from "../lib/getConfigData";
+import getDefinitionData from "../lib/getDefinitionData";
+import scrollToSelectedBlock from "@/logic/scrollToSelectedBlock.js";
+import addClickEventsToBlock from "@/logic/addClickEventsToBlock";
 
-  export default {
-    name: "EditorManager",
+export default {
+  name: "EditorManager",
 
-    components: {
-      SidebarComp,
+  components: {
+    SidebarComp,
+  },
+
+  data: function () {
+    return {
+      data: {
+        editorsPayload: [],
+        blockRefType: "",
+        formInputs: {},
+        formInputsData: {},
+        editedConfigFile: {},
+        initialConfigFile: {},
+        definitionFile: {},
+        selectedBlockId: "",
+      },
+      state: {
+        isShowSideBar: true,
+        isAnyBlockSelected: false,
+      },
+    };
+  },
+
+  computed: {
+    currentBlock() {
+      if (!this.data.editedConfigFile) return null
+      return this.data.editedConfigFile.data.areas[0].blocks.find(
+        (block) => block.id === this.data.selectedBlockId
+      );
+    },
+    currentBlockDefinition() {
+      if (!this.data.definitionFile) return null
+      return this.data.definitionFile.data.definitions.find((def) => {
+        return def.type === this.currentBlock.type;
+      });
+    },
+    isEdited() {
+      return (
+        JSON.stringify(this.data.initialConfigFile) !==
+        JSON.stringify(this.data.editedConfigFile)
+      );
+    },
+  },
+
+  methods: {
+    toggleSidebarHandler() {
+      this.state.isShowSideBar = !this.state.isShowSideBar;
     },
 
-    data: function () {
-      return {
-        data: {
-          editorsPayload: [],
-          blockRefType: "",
-          formInputs: {},
-          formInputsData: {},
-          editedConfigFile: {}, 
-          initialConfigFile: {},
-          initialDefinitionFile: {},
-          selectedBlockId: ""
-        },
-        state: {
-          isShowSideBar: true,
-          isAnyBlockSelected: false
-        },
-      };
+    updateConfig(newData) {
+      this.data.editedConfigFile = newData;
     },
 
-    computed: {
-      currentConfiguration(){
-          if(this.data.editedConfigFile?.data?.areas[0]?.blocks) {
-              return this.data.editedConfigFile;
-          } else {
-            return this.data.initialConfigFile;
-          }
-        },
-      currentBlock(){
-        return this.currentConfiguration.data.areas[0].blocks.find(block=>block.id === this.data.selectedBlockId)
-      },
-      currentBlockDefinition(){
-        const definition = definitionFile.data.definitions.find(def=>def.type === this.currentBlock.type)
-        if (!definition) return null
-        return definition
-      },
+    selectingBlock(block) {
+      const blockEvent = { target: { id: block.id } };
+      this.handleFormDataSetUp(blockEvent);
+      this.state.isAnyBlockSelected = true;
     },
 
-    methods: {
-      toggleSidebarHandler() {
-        this.state.isShowSideBar = !this.state.isShowSideBar;
-      },
+    unselectingBlock() {
+      this.state.isAnyBlockSelected = false;
+    },
 
-      updateConfigLocally(newData) {
-        this.data.editedConfigFile = newData
-      },
-
-      selectingBlock(block) {
-        const blockEvent =  {target: {id: block.id}}
-        this.handleFormDataSetUp(blockEvent)
-        this.state.isAnyBlockSelected = true
-      },
-
-      unselectingBlock() {
-        this.state.isAnyBlockSelected = false
-      },
-
-      getBlockElement(e) {
-          if (e.target.id.split("ID")[0] === "block") {
-            return e.target;
-          } else {
-            return e.target.parentElement;
-          }
-      },
-
-      setupEditorPayloadData() {
-        for (const [i, value] of Object.values(this.data.formInputs).entries()) {
-          const type = value
-          const data = Object.values(this.data.formInputsData)[i];
-          const inputSectionName = Object.keys(this.data.formInputsData)[i];
-
-          this.data.editorsPayload.push({
-            blockRefType: this.data.blockRefType,
-            type,
-            data,
-            inputSectionName,
-            blockID: this.data.selectedBlockId,
-          });
-        }
-      },
-
-      setFormInputsAndDataAndBlockRefType() {
-        this.data.formInputsData = this.currentBlock.data
-        this.data.formInputs = this.currentBlockDefinition.inputs
-        this.data.blockRefType = this.currentBlockDefinition.type
-      },
-
-      handleFormDataSetUp(e) {
-        const blockElement = this.getBlockElement(e)
-          this.data.selectedBlockId = blockElement.id
-          this.state.isAnyBlockSelected = true;
-
-          this.setFormInputsAndDataAndBlockRefType()
-          this.data.editorsPayload = []
-          this.setupEditorPayloadData()
-
-          scrollToSelectedBlock(blockElement.id)
-      },
-
-      async bringInitialData() {
-        this.data.initialConfigFile = await getConfigData("la-plagne")
-        this.data.editedConfigFile = this.data.initialConfigFile
-        this.data.initialDefinitionFile = definitionFile
+    getBlockElement(e) {
+      if (e.target.id.split("ID")[0] === "block") {
+        return e.target;
+      } else {
+        return e.target.parentElement;
       }
     },
 
-    async mounted() {
-      this.bringInitialData()
+    setupEditorPayloadData() {
+      for (const [i, value] of Object.values(this.data.formInputs).entries()) {
+        const type = value;
+        const data = Object.values(this.data.formInputsData)[i];
+        const inputSectionName = Object.keys(this.data.formInputsData)[i];
 
-      const areas = document.getElementById("areas").children;
-
-      for(const area of areas) {
-        addClickEventsToBlock(area, this.handleFormDataSetUp)
+        this.data.editorsPayload.push({
+          blockRefType: this.data.blockRefType,
+          type,
+          data,
+          inputSectionName,
+          blockID: this.data.selectedBlockId,
+        });
       }
     },
-  };
+
+    setFormInputsAndDataAndBlockRefType() {
+      if (!this.currentBlock || !this.currentBlockDefinition) return null
+      this.data.formInputsData = this.currentBlock.data;
+      this.data.formInputs = this.currentBlockDefinition.inputs;
+      this.data.blockRefType = this.currentBlockDefinition.type;
+    },
+
+    handleFormDataSetUp(e) {
+      const blockElement = this.getBlockElement(e);
+      this.data.selectedBlockId = blockElement.id;
+      this.state.isAnyBlockSelected = true;
+
+      this.setFormInputsAndDataAndBlockRefType();
+      this.data.editorsPayload = [];
+      this.setupEditorPayloadData();
+
+      scrollToSelectedBlock(blockElement.id);
+    },
+
+    async bringInitialData() {
+      const [config, definition] = await Promise.all([
+        await getConfigData("la-plagne"),
+        await getDefinitionData(),
+      ]);
+      this.data.initialConfigFile = config;
+      this.data.definitionFile = definition;
+      this.data.editedConfigFile = JSON.parse(
+        JSON.stringify(this.data.initialConfigFile)
+      );
+    },
+  },
+
+  async mounted() {
+    await this.bringInitialData();
+
+    const areas = document.getElementById("areas").children;
+
+    for (const area of areas) {
+      addClickEventsToBlock(area, this.handleFormDataSetUp);
+    }
+  },
+};
 </script>
 
 <style>
-    [editable~="true"] {
-      cursor: pointer;
-    }
+[editable~="true"] {
+  cursor: pointer;
+}
 
-    .currently-selected-block {
-      border: 3px solid #1C5D9F;
-      border-radius: 5px;
-    }
+.currently-selected-block {
+  border: 3px solid #1c5d9f;
+  border-radius: 5px;
+}
 </style>

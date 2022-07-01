@@ -5,17 +5,28 @@
             :handleFormDataSetUp="handleFormDataSetUp"
             :configFile="configFile"
             :editorsPayload="editorsPayload"
+            @make-save-button-available="makeSaveButtonAvailable"
         ></EditorsDisplayer>
         <BlockSelector
             v-else
             :handleFormDataSetUp="handleFormDataSetUp"
-            :newConfigFile="configFile"
-            :initialDefinitionFile="initialDefinitionFile"
-            @update-config-locally-bridge="updateConfigLocallyBridge"
+            :configFile="configFile"
+            :definitionFile="definitionFile"
+            @make-save-button-available="makeSaveButtonAvailable"
+            @update-config="updateConfig"
             @selected-block-bridge="selectedBlockBridge"
-            @selected-block-bridge-one="selectedBlockBridgeOne"
+            @block-click="handleBlockClick"
         ></BlockSelector>
+        <button
+            :disabled="!isEdited"
+            v-if="!this.isAnyBlockSelected"
+            class="btn btn-primary my-2"
+            @click="saveChangesHandler"
+        >
+            Save Changes
+        </button>
     </div>
+
 
     <button
         type="button"
@@ -58,6 +69,7 @@
 <script>
     import EditorsDisplayer from "./EditorsDisplayer.vue";
     import BlockSelector from "./BlockSelector.vue";
+    // import saveNewPage from "../lib/saveNewPage"
 
     export default {
         name: "SidebarComp",
@@ -70,31 +82,51 @@
             handleFormDataSetUp: Function,
             configFile: Object,
             editorsPayload: Array,
-            initialDefinitionFile: Object
+            definitionFile: Object,
+            isEdited: Boolean,
+        },
+
+        data: function () {
+            return {
+                state: {
+                    isSavaButtonDisabled: true,
+                },
+            };
         },
 
         computed: {
             toggleIcon() {
                 return this.isShowSideBar ? "bi-arrow-left" : "bi-arrow-right";
             },
+
         },
         methods: {
             toggleSidebar() {
                 this.$emit("toggleSidebar");
             },
 
-            updateConfigLocallyBridge(newPreviewConfig){
-                this.$emit('update-config-locally', newPreviewConfig);
+            updateConfig(newPreviewConfig){
+                this.$emit('update-config', newPreviewConfig);
             },
 
             selectedBlockBridge(newBlock) {
                 this.$emit('select-block', newBlock);
             },
 
-            selectedBlockBridgeOne(e){
+            handleBlockClick(e){
                 this.$emit("selected-block", e)
-            }
+            },
 
+            makeSaveButtonAvailable(){
+                this.state.isSavaButtonDisabled = false
+            },
+
+            async saveChangesHandler() {
+
+                console.log("configFile",this.configFile)
+                // TODO FIx lmbda json format
+                // saveNewPage(this.configFile, "la-plagne")
+            },
         },
     };
 </script>

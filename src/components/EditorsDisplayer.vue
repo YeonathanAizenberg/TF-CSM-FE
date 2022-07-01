@@ -36,22 +36,12 @@
       </div>
     </div>
   </div>
-  <button
-    class="btn btn-primary my-2"
-    @click="saveChangesHandler"
-    v-if="!this.state.isLoading"
-  >
-    Save Changes
-  </button>
 </template>
 
 <script>
   import TextEditor from "./editors/TextEditor.vue";
   import ImageEditor from "./editors/ImageEditor.vue";
   import generatePage from '@/lib/generatePage';
-  // import getConfigData from '@/lib/getConfigData';
-  // import getPage from '@/lib/getPage';
-  // import updateConfigData from '@/lib/updateConfigData';
   import addClickEventsToBlock  from "@/logic/addClickEventsToBlock";
 
   export default {
@@ -74,17 +64,13 @@
           blockData: null,
           modifiedImageUrl: "",
           editorsPayloadNewBlock: null,
+          currentBlock: {},
+          previewBlocksConfig: {}
         },
         state: {
           isLoading: false,
         },
       };
-    },
-
-    computed: {
-      isEditorsPayloadNotEmpty() {
-        return this.editorsPayload?.length > 0;
-      },
     },
 
     watch: {
@@ -115,40 +101,18 @@
         this.$parent.$emit("unselect-block");
       },
 
-      async updateAreaWithPreview() {
-        const previewBlockModified = this.data.blockData;
-        let previewBlocksConfig = this.configFile;
-        let currentBlock;
-
-        // Get the current block
-        currentBlock = previewBlocksConfig.data.areas[0].blocks.find(block=>block.id === previewBlockModified.blockID)
-
-        // Putting the correct data into the currentBlock
-        for (const [i,field] of previewBlockModified.fields.entries()) {
-          let currentKey = Object.keys(currentBlock.data)[i];
-          if(field.inputSectionName === currentKey) {
-            currentBlock.data[currentKey] = field.data
-          }
-        }
-
-        // "Building the confing file" to generate the HTML and ypdate the current configFile
-        for (let block of previewBlocksConfig.data.areas[0].blocks) {
-          if(block.id === previewBlockModified.blockID) {
-            block = currentBlock
-          }
-        }
-
-        const previewHTML = await generatePage("la-plagne", previewBlocksConfig);
+      async swapCurrentAndPreviewAreas() {
+        const previewHTML = await generatePage("la-plagne", this.configFile);
         var previewHTMLPageDom = new DOMParser().parseFromString(
           previewHTML.data,
           "text/html"
         );
 
         const previewArea = previewHTMLPageDom.getElementById(
-          currentBlock.id
+          this.data.currentBlock.id
         ).parentElement;
 
-        let currentArea = document.getElementById(currentBlock.id).parentElement;
+        let currentArea = document.getElementById(this.data.currentBlock.id).parentElement;
 
         addClickEventsToBlock(
           previewArea,
@@ -161,132 +125,37 @@
             resolve();
           }, 1000);
         });
-
-        // this.$parent.$emit('update-config-locally', previewBlocksConfig);
       },
 
-      // updateImageLocally(newImageUrl) {
-      //     this.data.modifiedImageUrl = newImageUrl
-      // },
+      setUpCurrentBlockData() {
+        this.data.currentBlock = this.configFile.data.areas[0].blocks.find(block=>block.id === this.data.blockData.blockID)
 
-  //     async saveChangesHandler() {
-  //       const currentBlockId = this.data.blockData.blockID;
-  //       const configData = await getConfigData("la-plagne");
-  //       this.state.isLoading = true;
-  //       let newBlockMetaData;
-  //       let newBlockData = {};
-  //       let currentBlock = document.getElementById(currentBlockId);
+        for (const [i,field] of this.data.blockData.fields.entries()) {
+          let currentKey = Object.keys(this.data.currentBlock.data)[i];
+          if(field.inputSectionName === currentKey) {
+            this.data.currentBlock.data[currentKey] = field.data
+          }
+        }
+      },
 
-  //       let newConfigData = [];
-  //       let isFound = false;
+      async updateAreaWithPreview() {
+        this.setUpCurrentBlockData()
 
-  //       //Checking if it is a New Block
-  //       for (let area of configData.data.areas) {
-  //         if (isFound) break;
-  //         for (let block of area.blocks) {
-  //           if (isFound) break;
-  //           if (block.id === currentBlockId) {
-  //             isFound = true;
-  //           }
-  //         }
-  //       }
+        this.swapCurrentAndPreviewAreas()
+        
+        this.$emit("make-save-button-available");
+      },
 
-  //       for (let i = 0; i < configData.data.areas[0].blocks.length; i++) {
-  //         if (configData.data.areas[0].blocks[i].id === currentBlockId) {
-  //           if (configData.data.areas[0].blocks[i].type === "borderText") {
-  //             configData.data.areas[0].blocks[i].data.linkText =
-  //               this.data.blockData.fields[2].data;
-  //             configData.data.areas[0].blocks[i].data.text =
-  //               this.data.blockData.fields[1].data;
-  //             configData.data.areas[0].blocks[i].data.title =
-  //               this.data.blockData.fields[0].data;
-  //           } else {
-  //             configData.data.areas[0].blocks[i].data.title =
-  //               this.data.blockData.fields[0].data;
-  //             // configData.data.areas[0].blocks[i].data.url = this.data.modifiedImageUrl
-  //             configData.data.areas[0].blocks[i].data.url =
-  //               "https://picsum.photos/200";
-  //           }
-  //         } else {
-  //           newBlockMetaData = {
-  //             id: this.data.editorsPayloadNewBlock[0].blockID,
-  //             type: this.data.editorsPayloadNewBlock[0].blockRefType,
-  //             version: "1",
-  //             htmlTemplatePath: `../components/${this.data.editorsPayloadNewBlock[0].blockRefType}/${this.data.editorsPayloadNewBlock[0].blockRefType}.ejs`,
-  //             cssPath: `../components/${this.data.editorsPayloadNewBlock[0].blockRefType}/${this.data.editorsPayloadNewBlock[0].blockRefType}.scss`,
-  //             data: {},
-  //           };
-
-  //           for (let i = 0; i < this.data.editorsPayloadNewBlock.length; i++) {
-  //             newBlockData[this.data.blockData.fields[i].inputSectionName] =
-  //               this.data.blockData.fields[i].data;
-  //           }
-
-  //           newBlockMetaData.data = newBlockData;
-  //         }
-  //         if (!isFound) {
-  //           configData.data.areas[0].blocks.push(newBlockMetaData);
-  //           newConfigData = configData;
-  //           break;
-  //         } else {
-  //           newConfigData = configData;
-  //         }
-  //       }
-  //       // this.$parent.$emit('update-config-locally', newConfigData);
-
-  //       await updateConfigData(newConfigData, "la-plagne");
-
-  //       const newHTMLPage = await getPage("la-plagne");
-
-  //       var newHTMLPageDom = new DOMParser().parseFromString(
-  //         newHTMLPage.data,
-  //         "text/html"
-  //       );
-
-  //       const newHTMLPageBlock = newHTMLPageDom.getElementById(currentBlockId);
-
-  //       if (!isFound) {
-  //         const newHTMLPageBlockParent = newHTMLPageBlock.parentElement;
-  //         let currentArea = document.getElementById(newHTMLPageBlockParent.id);
-
-  //         const newBlocks = newHTMLPageBlockParent.children;
-
-  //         // addEventListener to the BlockId
-  //         for (const blocks of newBlocks) {
-  //           blocks.addEventListener("click", this.handleFormDataSetUp);
-  //         }
-
-  //         // addEventListener to the BlockId children
-  //         for (let i = 0; i < newBlocks.length; i++) {
-  //           for (let j = 0; j < newBlocks[i].children.length; j++) {
-  //             newBlocks[i].children[j].addEventListener(
-  //               "click",
-  //               this.handleFormDataSetUp
-  //             );
-  //           }
-  //         }
-
-  //         currentArea.replaceWith(newHTMLPageBlockParent);
-  //       } else {
-  //         const newHTMLPageBlockChildren = newHTMLPageBlock.children;
-
-  //         for (const children of newHTMLPageBlockChildren) {
-  //           children.addEventListener("click", this.handleFormDataSetUp);
-  //         }
-
-  //         currentBlock.replaceChildren(...newHTMLPageBlockChildren);
-  //       }
-
-  //       this.state.isLoading = false;
-  //     },
+      bringInitialData(){
+        this.data.editorsPayloadNewBlock = this.editorsPayload;
+        if (this.editorsPayload.length > 0) {
+          this.addBlockData(this.data.editorsPayloadNewBlock);
+        }
+      }
     },
 
     mounted() {
-      // We need it for new block. For the exixting blocks, we have a initial Proxy, so the watch works as it should
-      this.data.editorsPayloadNewBlock = this.editorsPayload;
-      if (this.editorsPayload.length > 0) {
-        this.addBlockData(this.data.editorsPayloadNewBlock);
-      }
+      this.bringInitialData()
     },
   };
 </script>

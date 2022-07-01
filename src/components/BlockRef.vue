@@ -1,5 +1,5 @@
 <template>
-    <div class="block-refs-wrapper clickable" @click="displayBlcok">
+    <div class="block-refs-wrapper clickable" @click="handleBlockClick">
         <div></div>
         <div>{{type}}</div>
         <div>#{{blockID}}</div>
@@ -37,8 +37,8 @@
 
 
         methods: {
-            displayBlcok() {
-                this.$emit('selected-block-bridge-two', this.data.event);
+            handleBlockClick() {
+                this.$emit('block-click', this.data.event);
             },
         },
 
