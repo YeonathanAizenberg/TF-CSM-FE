@@ -122,10 +122,7 @@
             },
 
             async saveChangesHandler() {
-
-                console.log("configFile",this.configFile)
-                // TODO FIx lmbda json format
-                // saveNewPage(this.configFile, "la-plagne")
+                saveNewPage(this.configFile, "la-plagne")
             },
         },
     };
