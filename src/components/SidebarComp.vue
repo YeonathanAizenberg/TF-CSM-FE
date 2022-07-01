@@ -69,7 +69,7 @@
 <script>
     import EditorsDisplayer from "./EditorsDisplayer.vue";
     import BlockSelector from "./BlockSelector.vue";
-    // import saveNewPage from "../lib/saveNewPage"
+    import saveNewPage from "../lib/saveNewPage"
 
     export default {
         name: "SidebarComp",
