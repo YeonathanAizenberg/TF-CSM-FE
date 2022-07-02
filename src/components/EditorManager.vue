@@ -1,6 +1,7 @@
 <template>
   <div>
     <SidebarComp
+      :isLoading="state.isLoading"
       :isShowSideBar="state.isShowSideBar"
       :handleFormDataSetUp="handleFormDataSetUp"
       :isAnyBlockSelected="state.isAnyBlockSelected"
@@ -14,6 +15,7 @@
       @update-config="updateConfig"
       @selected-block="handleFormDataSetUp"
       @delete-block="deleteBlock"
+      @save-changes-handler="saveChangesHandler"
     />
   </div>
 </template>
@@ -25,6 +27,7 @@ import deleteConfigBlock from "../lib/deleteConfigBlock";
 import getDefinitionData from "../lib/getDefinitionData";
 import scrollToSelectedBlock from "@/logic/scrollToSelectedBlock.js";
 import addClickEventsToBlock from "@/logic/addClickEventsToBlock";
+import saveNewPage from "../lib/saveNewPage"
 
 export default {
   name: "EditorManager",
@@ -48,6 +51,7 @@ export default {
       state: {
         isShowSideBar: true,
         isAnyBlockSelected: false,
+        isLoading: true
       },
     };
   },
@@ -119,11 +123,19 @@ export default {
     },
 
     async deleteBlock(blockId){
+      this.state.isLoading = true
       const configFileCopy = this.removeBlockFromConfig(blockId)
 
       const modifiedHTML = await deleteConfigBlock(configFileCopy, "la-plagne")
 
       this.updateUIwithModifiedHTML(modifiedHTML, blockId, configFileCopy)
+      this.state.isLoading = false
+    },
+
+    async saveChangesHandler() {
+      this.state.isLoading = true
+      await saveNewPage(this.data.editedConfigFile, "la-plagne")
+      this.state.isLoading = false
     },
 
     getBlockElement(e) {
@@ -190,17 +202,36 @@ export default {
     for (const area of areas) {
       addClickEventsToBlock(area, this.handleFormDataSetUp);
     }
+
+    this.state.isLoading = false
   },
 };
 </script>
 
 <style>
-[editable~="true"] {
-  cursor: pointer;
-}
+  [editable~="true"] {
+    cursor: pointer;
+  }
 
-.currently-selected-block {
-  border: 3px solid #1c5d9f;
-  border-radius: 5px;
-}
+  .currently-selected-block {
+    border: 3px solid #1c5d9f;
+    border-radius: 5px;
+  }
+
+  .loading {
+      position: absolute;
+      top: 45%;
+      left: 45%;
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid #005fa9;
+      width: 120px;
+      height: 120px !important;
+      animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+  }
 </style>

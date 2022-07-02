@@ -1,5 +1,5 @@
 <template>
-  <div v-if="this.state.isLoading">Loading...</div>
+  <div v-if="this.state.isLoading" class="loading"></div>
   <div class="header-wrapper" v-if="!this.state.isLoading">
     <div class="header-slot-one">
       <button class="btn btn-primary my-2" @click="backToBlockSelector">
@@ -18,7 +18,7 @@
     </div>
   </div>
   <div class="editor-displayer-container" v-if="!this.state.isLoading">
-    <div id="editorDisplayerCarsWrapper" v-if="data.blockData?.fields">
+    <div id="editor-displayer-Wrapper" v-if="data.blockData?.fields">
       <div
         v-for="(field, index) in data.blockData.fields"
         :key="data.blockData.blockID + index"
@@ -75,7 +75,7 @@
           previewBlocksConfig: {}
         },
         state: {
-          isLoading: false,
+          isLoading: true,
         },
       };
     },
@@ -167,6 +167,7 @@
 
     mounted() {
       this.bringInitialData()
+      this.state.isLoading = false
     },
   };
 </script>

@@ -1,33 +1,35 @@
 <template>
-    <div v-show="isShowSideBar" class="card sidebar-component">
-        <EditorsDisplayer
-            v-if="this.isAnyBlockSelected"
-            :handleFormDataSetUp="handleFormDataSetUp"
-            :configFile="configFile"
-            :editorsPayload="editorsPayload"
-            @make-save-button-available="makeSaveButtonAvailable"
-            @delete-block="deleteBlock"
-        ></EditorsDisplayer>
-        <BlockSelector
-            v-else
-            :handleFormDataSetUp="handleFormDataSetUp"
-            :configFile="configFile"
-            :definitionFile="definitionFile"
-            @make-save-button-available="makeSaveButtonAvailable"
-            @update-config="updateConfig"
-            @selected-block-bridge="selectedBlockBridge"
-            @block-click="handleBlockClick"
-        ></BlockSelector>
-        <button
-            :disabled="!isEdited"
-            v-if="!this.isAnyBlockSelected"
-            class="btn btn-primary my-2"
-            @click="saveChangesHandler"
-        >
-            Save Changes
-        </button>
+    <div v-show="isShowSideBar" class="card sidebar-component" >
+    <div v-if="this.isLoading" class="loading"></div>
+        <div class="card sidebar-component" v-else>
+            <EditorsDisplayer
+                v-if="this.isAnyBlockSelected"
+                :handleFormDataSetUp="handleFormDataSetUp"
+                :configFile="configFile"
+                :editorsPayload="editorsPayload"
+                @make-save-button-available="makeSaveButtonAvailable"
+                @delete-block="deleteBlock"
+            ></EditorsDisplayer>
+            <BlockSelector
+                v-else
+                :handleFormDataSetUp="handleFormDataSetUp"
+                :configFile="configFile"
+                :definitionFile="definitionFile"
+                @make-save-button-available="makeSaveButtonAvailable"
+                @update-config="updateConfig"
+                @selected-block-bridge="selectedBlockBridge"
+                @block-click="handleBlockClick"
+            ></BlockSelector>
+            <button
+                :disabled="!isEdited"
+                v-if="!this.isAnyBlockSelected"
+                class="btn btn-primary my-2"
+                @click="saveChangesHandler"
+            >
+                Save Changes
+            </button>
+        </div>
     </div>
-
 
     <button
         type="button"
@@ -70,7 +72,6 @@
 <script>
     import EditorsDisplayer from "./EditorsDisplayer.vue";
     import BlockSelector from "./BlockSelector.vue";
-    import saveNewPage from "../lib/saveNewPage"
 
     export default {
         name: "SidebarComp",
@@ -85,6 +86,7 @@
             editorsPayload: Array,
             definitionFile: Object,
             isEdited: Boolean,
+            isLoading: Boolean
         },
 
         data: function () {
@@ -123,7 +125,7 @@
             },
 
             async saveChangesHandler() {
-                saveNewPage(this.configFile, "la-plagne")
+                this.$emit("save-changes-handler");
             },
 
             deleteBlock(blockId) {

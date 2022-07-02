@@ -37,6 +37,7 @@ import BlockRef from "./BlockRef.vue";
 import NewBlockRef from "./NewBlockRef.vue";
 import MainModal from "./MainModal.vue";
 import addClickEventsToBlock from "@/logic/addClickEventsToBlock";
+// import draggable from "vuedraggable"
 
 export default {
   name: "BlockSelector",
@@ -45,6 +46,7 @@ export default {
     BlockRef,
     MainModal,
     NewBlockRef,
+    // draggable
   },
 
   props: {
@@ -136,8 +138,8 @@ export default {
       await this.updateUIwithNewBlock(preparedBlock)
       this.handleBlockClick({target:{id:newBlock.id}})
 
-      this.state.isModalLoading = false;
       this.state.isShowModal = false;
+      this.state.isModalLoading = false;
     },
   },
 };
