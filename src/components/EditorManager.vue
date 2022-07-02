@@ -13,6 +13,7 @@
       @toggleSidebar="toggleSidebarHandler"
       @update-config="updateConfig"
       @selected-block="handleFormDataSetUp"
+      @delete-block="deleteBlock"
     />
   </div>
 </template>
@@ -20,6 +21,7 @@
 <script scoped>
 import SidebarComp from "./SidebarComp.vue";
 import getConfigData from "../lib/getConfigData";
+import deleteConfigBlock from "../lib/deleteConfigBlock";
 import getDefinitionData from "../lib/getDefinitionData";
 import scrollToSelectedBlock from "@/logic/scrollToSelectedBlock.js";
 import addClickEventsToBlock from "@/logic/addClickEventsToBlock";
@@ -88,6 +90,40 @@ export default {
 
     unselectingBlock() {
       this.state.isAnyBlockSelected = false;
+    },
+
+    removeBlockFromConfig(blockId) {
+      const configFileCopy = JSON.parse(JSON.stringify(this.data.editedConfigFile))
+      configFileCopy.data.areas[0].blocks.splice(configFileCopy.data.areas[0].blocks.findIndex(block => block.id === blockId) , 1)
+      return configFileCopy
+    },
+
+    updateUIwithModifiedHTML(modifiedHTML, blockId, configFileCopy){
+      const modifiedHTMLPageDom = new DOMParser().parseFromString(
+        modifiedHTML.data,
+        "text/html"
+      );
+
+      const currentArea = document.getElementById(blockId).parentElement;
+
+      const modifiedCurrentArea = modifiedHTMLPageDom.getElementById(
+        currentArea.id
+      );
+
+      addClickEventsToBlock(modifiedCurrentArea, this.handleFormDataSetUp);
+      currentArea.replaceWith(modifiedCurrentArea);
+
+      this.updateConfig(configFileCopy)
+
+      this.unselectingBlock()
+    },
+
+    async deleteBlock(blockId){
+      const configFileCopy = this.removeBlockFromConfig(blockId)
+
+      const modifiedHTML = await deleteConfigBlock(configFileCopy, "la-plagne")
+
+      this.updateUIwithModifiedHTML(modifiedHTML, blockId, configFileCopy)
     },
 
     getBlockElement(e) {

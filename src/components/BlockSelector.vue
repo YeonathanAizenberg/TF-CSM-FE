@@ -128,12 +128,13 @@ export default {
       currentArea.replaceWith(previewArea);
     },
 
-    addNewBlock(type) {
+    async addNewBlock(type) {
       this.state.isModalLoading = true;
 
       const newBlock = this.getEmptyBlock()
       const preparedBlock = this.predareEmptyBlock(type, newBlock)
-      this.updateUIwithNewBlock(preparedBlock)
+      await this.updateUIwithNewBlock(preparedBlock)
+      this.handleBlockClick({target:{id:newBlock.id}})
 
       this.state.isModalLoading = false;
       this.state.isShowModal = false;

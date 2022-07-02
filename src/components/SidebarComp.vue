@@ -6,6 +6,7 @@
             :configFile="configFile"
             :editorsPayload="editorsPayload"
             @make-save-button-available="makeSaveButtonAvailable"
+            @delete-block="deleteBlock"
         ></EditorsDisplayer>
         <BlockSelector
             v-else
@@ -123,6 +124,10 @@
 
             async saveChangesHandler() {
                 saveNewPage(this.configFile, "la-plagne")
+            },
+
+            deleteBlock(blockId) {
+                this.$emit("delete-block", blockId);
             },
         },
     };

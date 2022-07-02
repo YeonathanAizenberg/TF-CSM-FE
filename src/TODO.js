@@ -1,3 +1,3 @@
-//TODO   Add the Deletet Function
-//TODO   Start to move block part
-//TODO   CAT block
+//TODO Start to move block part
+//TODO Put Loading everywhere where is needed
+//TODO CAT block

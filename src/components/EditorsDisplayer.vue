@@ -1,13 +1,20 @@
 <template>
   <div v-if="this.state.isLoading">Loading...</div>
   <div class="header-wrapper" v-if="!this.state.isLoading">
-    <button class="btn btn-primary my-2" @click="backToBlockSelector">
-      Back
-    </button>
-    <div class="block-refs-wrapper">
-      <div></div>
-      <div>{{ this.editorsPayload[0].blockRefType }}</div>
-      <div>#{{ this.editorsPayload[0].blockID }}</div>
+    <div class="header-slot-one">
+      <button class="btn btn-primary my-2" @click="backToBlockSelector">
+        Back
+      </button>
+      <div class="block-refs-wrapper">
+        <div></div>
+        <div>{{ this.editorsPayload[0].blockRefType }}</div>
+        <div>#{{ this.editorsPayload[0].blockID }}</div>
+      </div>
+    </div>
+    <div class="header-slot-two">
+      <button class="btn btn-primary my-2" @click="deleteBlock">
+          DELETE
+      </button>
     </div>
   </div>
   <div class="editor-displayer-container" v-if="!this.state.isLoading">
@@ -101,6 +108,10 @@
         this.$parent.$emit("unselect-block");
       },
 
+      deleteBlock() {
+        this.$emit("delete-block", this.editorsPayload[0].blockID);
+      },
+
       async swapCurrentAndPreviewAreas() {
         const previewHTML = await generatePage("la-plagne", this.configFile);
         var previewHTMLPageDom = new DOMParser().parseFromString(
@@ -166,8 +177,12 @@
     display: flex;
     flex-direction: row;
     height: 5%;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
+  }
+
+  .header-slot-one {
+    display: flex;
   }
 
   .editor-displayer-container {
