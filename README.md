@@ -1,40 +1,11 @@
-# Blocks Swapping & Live Editor
+***Page Editor Project***
 
-## This project contains two parts:
+This project have two parts
+    1 - front-end editor page
+    2- AWS
 
-1. Blocks Swapping.
-2. Live Editor
+The schematics for the AWS architecture can be found on the projectArchitecture.drawio file
 
-## Blocks Swapping:
+On the front-end, the user can edit, save and delete elements from a current page. Doing that, he/she will be edditing the config file. When he/she is done, he/she have the possibility to save the changes, or just keep it on preview mode (Nothing will be saved, that is the preview mode)
 
-Implemented via vanilla JavaScript.
-
-The source files are at "swapRelatedFiles" directory.
-
-This app is responsible for swapping draggable blocks via
-drag & drop.
-
-There is also a css file which is included at index.html.
-
-When running "webpack", webpack will bundle the JavaScript
-files and the output is stored at "distBlocksSwap" under the name "blocks-swap.bundle.js".
-this bundled file is included at index.html.
-
-## Live Editor:
-
-Implemented via Vue.js 3.
-
-This Vue App is responsible for editing editable blocks via a GUI
-inteface.
-
-For now, The app can edit text and images.
-
-When running "dev" or "build", The vue-cli will build the project into
-a library and the output is stored at "dist".
-this bundled file is included at index.html.
-
-## dev & build:
-
-dev: run dev
-
-build: run build
+***When the user click on "Save changes" Button or in the "Delete" Button, the changes will be save on the DB and on the S3 bucket***

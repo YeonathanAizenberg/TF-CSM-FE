@@ -11,7 +11,6 @@
 
 <script>
 import EditorManager from "./components/EditorManager.vue";
-import { init } from "../swapRelatedFiles/blocks-swap.js";
 
 export default {
     name: "App",
@@ -31,8 +30,6 @@ export default {
 
         if (params?.mode && params?.mode === "edit") {
             this.isModeEdit = true;
-
-            init();
         }
     },
 };

@@ -32,7 +32,6 @@
             ></ImageEditor>
           </div>
           <div v-if="field.type === 'text'">
-            <!-- <div v-if="field.inputSectionName === 'title' || 'text'"> -->
             <TextEditor
               :blockID="data.blockData.blockID"
               :field="field"

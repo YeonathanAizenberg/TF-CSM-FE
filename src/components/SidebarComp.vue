@@ -15,6 +15,7 @@
                 :handleFormDataSetUp="handleFormDataSetUp"
                 :configFile="configFile"
                 :definitionFile="definitionFile"
+                @update-UI-for-new-blocks-order="updateUIForNewBlocksOrder"
                 @make-save-button-available="makeSaveButtonAvailable"
                 @update-config="updateConfig"
                 @selected-block-bridge="selectedBlockBridge"
@@ -104,6 +105,10 @@
 
         },
         methods: {
+            updateUIForNewBlocksOrder() {
+                this.$emit("update-UI-for-new-blocks-order")
+            },
+
             toggleSidebar() {
                 this.$emit("toggleSidebar");
             },

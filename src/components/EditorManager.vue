@@ -10,6 +10,7 @@
       :definitionFile="data.definitionFile"
       :isEdited="isEdited"
       @select-block="selectingBlock"
+      @update-UI-for-new-blocks-order="updateUIForNewBlocksOrder"
       @unselect-block="unselectingBlock"
       @toggleSidebar="toggleSidebarHandler"
       @update-config="updateConfig"
@@ -28,6 +29,9 @@ import getDefinitionData from "../lib/getDefinitionData";
 import scrollToSelectedBlock from "@/logic/scrollToSelectedBlock.js";
 import addClickEventsToBlock from "@/logic/addClickEventsToBlock";
 import saveNewPage from "../lib/saveNewPage"
+import getPage from '@/lib/getPage';
+import transferDOMelements from '@/utils/transferDOMelements.js'
+import generatePage from '@/lib/generatePage';
 
 export default {
   name: "EditorManager",
@@ -47,6 +51,7 @@ export default {
         initialConfigFile: {},
         definitionFile: {},
         selectedBlockId: "",
+        deployedHTMLString: "",
       },
       state: {
         isShowSideBar: true,
@@ -162,6 +167,28 @@ export default {
       }
     },
 
+    async updateUIForNewBlocksOrder(){
+      this.state.isLoading = true
+
+      const reOrderedBlocksHTML = await generatePage("la-plagne", this.data.editedConfigFile);
+      const reOrderedBlocksHTMLDOM = new DOMParser().parseFromString(
+        reOrderedBlocksHTML.data,
+        "text/html"
+      );
+      const generatedAreaOne = reOrderedBlocksHTMLDOM.querySelector("#area1")
+      const currentAreaOne = document.querySelector("#area1");
+
+      currentAreaOne.replaceWith(generatedAreaOne);
+      
+      const areas = document.getElementById("areas").children;
+
+      for (const area of areas) {
+        addClickEventsToBlock(area, this.handleFormDataSetUp);
+      }
+
+      this.state.isLoading = false
+    },
+
     setFormInputsAndDataAndBlockRefType() {
       if (!this.currentBlock || !this.currentBlockDefinition) return null
       this.data.formInputsData = this.currentBlock.data;
@@ -181,21 +208,39 @@ export default {
       scrollToSelectedBlock(blockElement.id);
     },
 
-    async bringInitialData() {
-      const [config, definition] = await Promise.all([
+    async fetchInitialData() {
+      const [config, definition, deployedHTML] = await Promise.all([
         await getConfigData("la-plagne"),
         await getDefinitionData(),
+        await getPage("la-plagne")
       ]);
       this.data.initialConfigFile = config;
       this.data.definitionFile = definition;
+      this.data.deployedHTMLString = deployedHTML;
+
       this.data.editedConfigFile = JSON.parse(
         JSON.stringify(this.data.initialConfigFile)
       );
     },
+
+    useDeployedHTMLFile() {
+      const deployedHTMLDOM = new DOMParser().parseFromString(
+        this.data.deployedHTMLString.data,
+        "text/html"
+      );
+
+      const generatedHead = deployedHTMLDOM.querySelector("head")
+      const generatedBody = deployedHTMLDOM.querySelector("body")
+
+      transferDOMelements(document.head ,generatedHead)
+      transferDOMelements(document.body ,generatedBody)
+    },
   },
 
   async mounted() {
-    await this.bringInitialData();
+    await this.fetchInitialData();
+  
+    this.useDeployedHTMLFile()
 
     const areas = document.getElementById("areas").children;
 
