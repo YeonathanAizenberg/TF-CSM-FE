@@ -7,7 +7,7 @@
                 id="ImageURL"
                 name="ImageURL"
                 type="text"
-                v-model="imageURL"
+                v-model="field.data"
             />
         </div>
         <button
@@ -31,8 +31,6 @@ export default {
 
     data() {
         return {
-            // https://picsum.photos/200
-            imageURL: "",
             currentEditableImageElement: null,
         };
     },
@@ -54,13 +52,12 @@ export default {
 
         updateImgToDOM() {
             const picDOMElement = this.currentEditableImageElement.children[0];
-            picDOMElement.src = this.imageURL;
-            this.$emit('update-image-locally', this.imageURL);
+            picDOMElement.src = this.field.data;
+            this.$emit('update-image-on-config', this.field.data);
         },
     },
 
     mounted() {
-        this.imageURL = this.field.data
         this.onBlockIDChange();
     },
 };

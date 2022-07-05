@@ -35,7 +35,8 @@ export default{
             "htmlTemplatePath": "../components/imageBox/imageBox.ejs",
             "cssPath": "../components/imageBox/borderText.scss",
             "data": {
-              "title": "EN VIDÉO"
+              "title": "EN VIDÉO",
+              "url": "https://picsum.photos/200",
             }
           }
         ]

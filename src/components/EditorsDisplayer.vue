@@ -28,7 +28,7 @@
             <ImageEditor
               :blockID="data.blockData.blockID"
               :field="field"
-              @update-image-locally="updateImageLocally"
+              @update-image-on-config="updateImageOnConfig"
             ></ImageEditor>
           </div>
           <div v-if="field.type === 'text'">
@@ -49,6 +49,7 @@
   import ImageEditor from "./editors/ImageEditor.vue";
   import generatePage from '@/lib/generatePage';
   import addClickEventsToBlock  from "@/logic/addClickEventsToBlock";
+  import domParser from '@/utils/domParser.js'
 
   export default {
     name: "EditorsDisplayer",
@@ -59,7 +60,7 @@
     },
 
     props: {
-      handleFormDataSetUp: Function,
+      handleFormDataSetUpProp: Function,
       configFile: Object,
       editorsPayload : Array,
     },
@@ -113,11 +114,7 @@
 
       async swapCurrentAndPreviewAreas() {
         const previewHTML = await generatePage("la-plagne", this.configFile);
-        var previewHTMLPageDom = new DOMParser().parseFromString(
-          previewHTML.data,
-          "text/html"
-        );
-
+        const previewHTMLPageDom = domParser(previewHTML.data)
         const previewArea = previewHTMLPageDom.getElementById(
           this.data.currentBlock.id
         ).parentElement;
@@ -126,7 +123,7 @@
 
         addClickEventsToBlock(
           previewArea,
-          this.handleFormDataSetUp
+          this.handleFormDataSetUpProp
         );
 
         await new Promise((resolve) => {
@@ -137,7 +134,7 @@
         });
       },
 
-      setUpCurrentBlockData() {
+      setUpCurrentBlockDataAndUpdateConfig() {
         this.data.currentBlock = this.configFile.data.areas[0].blocks.find(block=>block.id === this.data.blockData.blockID)
 
         for (const [i,field] of this.data.blockData.fields.entries()) {
@@ -149,11 +146,17 @@
       },
 
       async updateAreaWithPreview() {
-        this.setUpCurrentBlockData()
+        this.setUpCurrentBlockDataAndUpdateConfig()
 
         this.swapCurrentAndPreviewAreas()
         
         this.$emit("make-save-button-available");
+      },
+
+      updateImageOnConfig() {
+        this.setUpCurrentBlockDataAndUpdateConfig()
+
+        this.$emit("make-save-button-available")
       },
 
       bringInitialData(){

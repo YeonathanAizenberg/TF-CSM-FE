@@ -3,7 +3,7 @@
     <SidebarComp
       :isLoading="state.isLoading"
       :isShowSideBar="state.isShowSideBar"
-      :handleFormDataSetUp="handleFormDataSetUp"
+      :handleFormDataSetUpProp="handleFormDataSetUp"
       :isAnyBlockSelected="state.isAnyBlockSelected"
       :configFile="data.editedConfigFile"
       :editorsPayload="data.editorsPayload"
@@ -14,7 +14,7 @@
       @unselect-block="unselectingBlock"
       @toggleSidebar="toggleSidebarHandler"
       @update-config="updateConfig"
-      @selected-block="handleFormDataSetUp"
+      @handle-form-data-set-up="handleFormDataSetUp"
       @delete-block="deleteBlock"
       @save-changes-handler="saveChangesHandler"
     />
@@ -32,6 +32,7 @@ import saveNewPage from "../lib/saveNewPage"
 import getPage from '@/lib/getPage';
 import transferDOMelements from '@/utils/transferDOMelements.js'
 import generatePage from '@/lib/generatePage';
+import domParser from '@/utils/domParser.js'
 
 export default {
   name: "EditorManager",
@@ -108,10 +109,7 @@ export default {
     },
 
     updateUIwithModifiedHTML(modifiedHTML, blockId, configFileCopy){
-      const modifiedHTMLPageDom = new DOMParser().parseFromString(
-        modifiedHTML.data,
-        "text/html"
-      );
+      const modifiedHTMLPageDom = domParser(modifiedHTML.data)
 
       const currentArea = document.getElementById(blockId).parentElement;
 
@@ -156,7 +154,7 @@ export default {
         const type = value;
         const data = Object.values(this.data.formInputsData)[i];
         const inputSectionName = Object.keys(this.data.formInputsData)[i];
-
+        
         this.data.editorsPayload.push({
           blockRefType: this.data.blockRefType,
           type,
@@ -171,10 +169,7 @@ export default {
       this.state.isLoading = true
 
       const reOrderedBlocksHTML = await generatePage("la-plagne", this.data.editedConfigFile);
-      const reOrderedBlocksHTMLDOM = new DOMParser().parseFromString(
-        reOrderedBlocksHTML.data,
-        "text/html"
-      );
+      const reOrderedBlocksHTMLDOM = domParser(reOrderedBlocksHTML.data)
       const generatedAreaOne = reOrderedBlocksHTMLDOM.querySelector("#area1")
       const currentAreaOne = document.querySelector("#area1");
 
@@ -224,11 +219,7 @@ export default {
     },
 
     useDeployedHTMLFile() {
-      const deployedHTMLDOM = new DOMParser().parseFromString(
-        this.data.deployedHTMLString.data,
-        "text/html"
-      );
-
+      const deployedHTMLDOM = domParser(this.data.deployedHTMLString.data)
       const generatedHead = deployedHTMLDOM.querySelector("head")
       const generatedBody = deployedHTMLDOM.querySelector("body")
 

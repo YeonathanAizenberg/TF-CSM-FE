@@ -28,7 +28,7 @@
       item-key="element.id">
       <template #item="{element}">
         <div>
-          <div class="block-refs-wrapper clickable" @click="this.handleBlockClick({target:{id:element.id}})">
+          <div class="block-refs-wrapper clickable" @click="this.handleFormDataSetUp({target:{id:element.id}})">
               <div></div>
               <div>{{element.type}}</div>
               <div>#{{element.id}}</div>
@@ -50,6 +50,7 @@ import NewBlockRef from "./NewBlockRef.vue";
 import MainModal from "./MainModal.vue";
 import addClickEventsToBlock from "@/logic/addClickEventsToBlock";
 import Draggable  from "vuedraggable"
+import domParser from '@/utils/domParser.js'
 
 export default {
   name: "BlockSelector",
@@ -61,7 +62,7 @@ export default {
   },
 
   props: {
-    handleFormDataSetUp: Function,
+    handleFormDataSetUpProp: Function,
     configFile: Object,
     definitionFile: Object
   },
@@ -87,8 +88,8 @@ export default {
       this.$emit("update-UI-for-new-blocks-order")
     },
 
-    handleBlockClick(e){
-        this.$emit("block-click", e)
+    handleFormDataSetUp(e){
+        this.$emit("handle-form-data-set-up", e)
     },
 
     openAddNewBlockModal() {
@@ -133,10 +134,8 @@ export default {
       configFileCopy.data.areas[0].blocks.push(newBlock);
 
       const previewHTML = await generatePage("la-plagne", configFileCopy);
-      const previewHTMLPageDom = new DOMParser().parseFromString(
-        previewHTML.data,
-        "text/html"
-      );
+
+      const previewHTMLPageDom = domParser(previewHTML.data)
 
       const previewArea = previewHTMLPageDom.getElementById(
         newBlock.id
@@ -144,7 +143,7 @@ export default {
 
       const currentArea = document.getElementById(configFileCopy.data.areas[0].blocks[0].id).parentElement;
 
-      addClickEventsToBlock(previewArea, this.handleFormDataSetUp);
+      addClickEventsToBlock(previewArea, this.handleFormDataSetUpProp);
       this.$emit("update-config", configFileCopy);
       this.$emit("select-block-bridge", newBlock);
       this.$emit("make-save-button-available");
@@ -158,7 +157,7 @@ export default {
       const newBlock = this.getEmptyBlock()
       const preparedBlock = this.predareEmptyBlock(type, newBlock)
       await this.updateUIwithNewBlock(preparedBlock)
-      this.handleBlockClick({target:{id:newBlock.id}})
+      this.handleFormDataSetUp({target:{id:newBlock.id}})
 
       this.state.isShowModal = false;
       this.state.isModalLoading = false;

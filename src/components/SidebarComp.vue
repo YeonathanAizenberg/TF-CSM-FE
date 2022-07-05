@@ -4,7 +4,7 @@
         <div class="card sidebar-component" v-else>
             <EditorsDisplayer
                 v-if="this.isAnyBlockSelected"
-                :handleFormDataSetUp="handleFormDataSetUp"
+                :handleFormDataSetUpProp="handleFormDataSetUpProp"
                 :configFile="configFile"
                 :editorsPayload="editorsPayload"
                 @make-save-button-available="makeSaveButtonAvailable"
@@ -12,14 +12,14 @@
             ></EditorsDisplayer>
             <BlockSelector
                 v-else
-                :handleFormDataSetUp="handleFormDataSetUp"
+                :handleFormDataSetUpProp="handleFormDataSetUpProp"
                 :configFile="configFile"
                 :definitionFile="definitionFile"
                 @update-UI-for-new-blocks-order="updateUIForNewBlocksOrder"
                 @make-save-button-available="makeSaveButtonAvailable"
                 @update-config="updateConfig"
                 @selected-block-bridge="selectedBlockBridge"
-                @block-click="handleBlockClick"
+                @handle-form-data-set-up="handleFormDataSetUp"
             ></BlockSelector>
             <button
                 :disabled="!isEdited"
@@ -82,7 +82,7 @@
         props: {
             isShowSideBar: Boolean,
             isAnyBlockSelected:Boolean,
-            handleFormDataSetUp: Function,
+            handleFormDataSetUpProp: Function,
             configFile: Object,
             editorsPayload: Array,
             definitionFile: Object,
@@ -121,8 +121,8 @@
                 this.$emit('select-block', newBlock);
             },
 
-            handleBlockClick(e){
-                this.$emit("selected-block", e)
+            handleFormDataSetUp(e){
+                this.$emit("handle-form-data-set-up", e)
             },
 
             makeSaveButtonAvailable(){
