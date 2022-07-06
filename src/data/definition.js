@@ -21,13 +21,11 @@ const definitionFile = {
         }
       },
       {
-        "type": "tile",
+        "type": "editorJS",
         "version": "1",
         "image": "	https://app.umso.com/static/media/titles.aac94caa.svg",
         "inputs": {
-          "title": "text",
-          "text": "text",
-          "linkText": "text"
+          "editor":"object"
         }
       },
       {

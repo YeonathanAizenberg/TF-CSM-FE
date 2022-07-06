@@ -31,6 +31,7 @@ export default {
 
     data() {
         return {
+            // content: this.field.data,
             currentEditableImageElement: null,
         };
     },

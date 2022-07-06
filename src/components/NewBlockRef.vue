@@ -1,5 +1,5 @@
 <template>
-    <div class="new-block-refs-wrapper unable-block" v-if="!['borderText', 'imageBox'].includes(type)">
+    <div class="new-block-refs-wrapper unable-block" v-if="!['borderText', 'imageBox','editorJS'].includes(type)">
         <img :src="image" alt="default">
         <div>{{type}}</div>
     </div>

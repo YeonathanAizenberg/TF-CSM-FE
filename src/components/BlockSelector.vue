@@ -69,6 +69,7 @@ export default {
 
   data: function () {
     return {
+      // content: this.configFile,
       data: {
             event: {
                 target: {
@@ -132,20 +133,15 @@ export default {
     async updateUIwithNewBlock(newBlock) {
       const configFileCopy = JSON.parse(JSON.stringify(this.configFile))
       configFileCopy.data.areas[0].blocks.push(newBlock);
-
       const previewHTML = await generatePage("la-plagne", configFileCopy);
-
       const previewHTMLPageDom = domParser(previewHTML.data)
-
       const previewArea = previewHTMLPageDom.getElementById(
         newBlock.id
       ).parentElement;
-
       const currentArea = document.getElementById(configFileCopy.data.areas[0].blocks[0].id).parentElement;
 
       addClickEventsToBlock(previewArea, this.handleFormDataSetUpProp);
       this.$emit("update-config", configFileCopy);
-      this.$emit("select-block-bridge", newBlock);
       this.$emit("make-save-button-available");
 
       currentArea.replaceWith(previewArea);
@@ -156,6 +152,7 @@ export default {
 
       const newBlock = this.getEmptyBlock()
       const preparedBlock = this.predareEmptyBlock(type, newBlock)
+
       await this.updateUIwithNewBlock(preparedBlock)
       this.handleFormDataSetUp({target:{id:newBlock.id}})
 

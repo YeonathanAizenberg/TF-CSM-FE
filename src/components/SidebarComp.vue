@@ -9,6 +9,7 @@
                 :editorsPayload="editorsPayload"
                 @make-save-button-available="makeSaveButtonAvailable"
                 @delete-block="deleteBlock"
+                @update-config="updateConfig"
             ></EditorsDisplayer>
             <BlockSelector
                 v-else

@@ -38,6 +38,12 @@
               @update-area-with-preview="updateAreaWithPreview"
             ></TextEditor>
           </div>
+          <div v-if="field.type === 'object'">
+            <EditorJsPanel
+              :field="field"
+              @display-editorJS-changes="displayEditorJSChanges"
+            ></EditorJsPanel>
+          </div>
         </div>
       </div>
     </div>
@@ -45,8 +51,9 @@
 </template>
 
 <script>
-  import TextEditor from "./editors/TextEditor.vue";
   import ImageEditor from "./editors/ImageEditor.vue";
+  import TextEditor from "./editors/TextEditor.vue";
+  import EditorJsPanel from "./editors/EditorJsPanel.vue";
   import generatePage from '@/lib/generatePage';
   import addClickEventsToBlock  from "@/logic/addClickEventsToBlock";
   import domParser from '@/utils/domParser.js'
@@ -57,6 +64,7 @@
     components: {
       TextEditor,
       ImageEditor,
+      EditorJsPanel,
     },
 
     props: {
@@ -134,19 +142,19 @@
         });
       },
 
-      setUpCurrentBlockDataAndUpdateConfig() {
+      setUpCurrentBlockData(savedDataFromEditorJS) {
         this.data.currentBlock = this.configFile.data.areas[0].blocks.find(block=>block.id === this.data.blockData.blockID)
 
         for (const [i,field] of this.data.blockData.fields.entries()) {
           let currentKey = Object.keys(this.data.currentBlock.data)[i];
           if(field.inputSectionName === currentKey) {
-            this.data.currentBlock.data[currentKey] = field.data
+            savedDataFromEditorJS ? this.data.currentBlock.data[currentKey] = savedDataFromEditorJS : this.data.currentBlock.data[currentKey] = field.data
           }
         }
       },
 
       async updateAreaWithPreview() {
-        this.setUpCurrentBlockDataAndUpdateConfig()
+        this.setUpCurrentBlockData()
 
         this.swapCurrentAndPreviewAreas()
         
@@ -154,9 +162,20 @@
       },
 
       updateImageOnConfig() {
-        this.setUpCurrentBlockDataAndUpdateConfig()
+        this.setUpCurrentBlockData()
 
         this.$emit("make-save-button-available")
+      },
+
+      displayEditorJSChanges(savedDataFromEditorJS){
+        this.updateConfigWithNewEditorJSData(savedDataFromEditorJS)
+        this.swapCurrentAndPreviewAreas()
+      },
+
+      updateConfigWithNewEditorJSData(savedDataFromEditorJS) {
+        this.setUpCurrentBlockData(savedDataFromEditorJS) 
+        const configFileCopy = JSON.parse(JSON.stringify(this.configFile))
+        this.$emit("update-config", configFileCopy);
       },
 
       bringInitialData(){
