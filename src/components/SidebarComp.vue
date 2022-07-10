@@ -2,6 +2,8 @@
     <div v-show="isShowSideBar" class="card sidebar-component" >
     <div v-if="this.isLoading" class="loading"></div>
         <div class="card sidebar-component" v-else>
+        <!-- TODO compute the isEditorJS class when open the editor JS on side bar -->
+        <!-- <div class="card sidebar-component" :class="isEditorJS ? 'sidebar-componen-for-editor-js' : '' " v-else> -->
             <EditorsDisplayer
                 v-if="this.isAnyBlockSelected"
                 :handleFormDataSetUpProp="handleFormDataSetUpProp"
@@ -103,7 +105,10 @@
             toggleIcon() {
                 return this.isShowSideBar ? "bi-arrow-left" : "bi-arrow-right";
             },
-
+        // // TODO compute the isEditorJS class when open the editor JS on side bar
+        //     isPanelContainEditorJS() {
+        //         return !!this.data.blockData.fields.find(field => field.type === 'object')
+        //     },
         },
         methods: {
             updateUIForNewBlocksOrder() {

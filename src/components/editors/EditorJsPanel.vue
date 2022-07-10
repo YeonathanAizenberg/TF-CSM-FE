@@ -16,9 +16,14 @@ import List from "@editorjs/list";
 import Checklist from "@editorjs/checklist";
 import Paragraph from "@editorjs/paragraph";
 import Delimiter  from "@editorjs/delimiter";
+import { v4 as uuidv4 } from 'uuid';
+import uploadeImageToS3  from "@/lib/uploadeImageToS3";
 
 export default {
+    name: "EditorJsPanel",
+
     props: {
+        blockID: String,
         field: Object,
     },
 
@@ -30,11 +35,10 @@ export default {
     methods: {
         displayEditorJSChanges() {
             editor.save().then(savedData => {
-                console.log("1111")
                 this.$emit("display-editorJS-changes", savedData)
             });
         },
-        myEditor() {
+        initiateEditorJS() {
             window.editor = new EditorJS({
                 // minHeight:8,
                 holder: "codex-editor",
@@ -61,26 +65,37 @@ export default {
                     image: {
                         class: ImageTool,
                         config: {
-                            endpoints: {
-                            byFile: 'http://localhost:8008/uploadFile', // Your backend file uploader endpoint
-                            byUrl: 'http://localhost:8008/fetchUrl', // Your endpoint that provides uploading by Url
+                            uploader: {
+                            /**
+                             * Upload file to the server and return an uploaded image data
+                             * @param {File} file - file selected from the device or pasted by drag-n-drop
+                             * @return {Promise.<{success, file: {url}}>}
+                             */
+                                async uploadByFile(file){
+                                    return await uploadeImageToS3("page",file,"https://www.travelski.com/la-plagne",`${uuidv4()}`)
+                                },
+
+                            /**
+                             * Send URL-string to the server. Backend should load image by this URL and return an uploaded image data
+                             * @param {string} url - pasted image URL
+                             * @return {Promise.<{success, file: {url}}>}
+                             */
+                                async uploadByUrl(url){
+                                    return await uploadeImageToS3("page",url,"https://www.travelski.com/la-plagne",`${uuidv4()}`)
+                                }
                             }
+
                         }
                     },
                     delimiter: Delimiter,
                 },
                 data: this.showSavedData(),
-                onReady: () => {
-                    console.log('Editor.js is ready to work!', this.field.data)
-                },
-                onChange() {
-                console.log("change");
-                },
             });
         },
         showSavedData() {
             return this.field.data
         },
+        // TODO compute the isEditorJS class when open the editor JS on side bar
         resizeSideBarBeforeOpenEditorJS(){
             const sidebar = document.querySelector('.sidebar-component').children[0]
             const toggleSideBarButton = document.querySelector('.move-toggle-sidebar')
@@ -94,8 +109,8 @@ export default {
             toggleSideBarButton.classList.remove('move-toggle-sidebar-button-for-editor-js')
         },
     },
-    mounted() {
-        this.myEditor();
+    async mounted() {
+        this.initiateEditorJS();
         this.resizeSideBarBeforeOpenEditorJS()
     },
     beforeUnmount() {

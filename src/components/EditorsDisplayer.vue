@@ -20,8 +20,8 @@
   <div class="editor-displayer-container" v-if="!this.state.isLoading">
     <div id="editor-displayer-Wrapper" v-if="data.blockData?.fields">
       <div
-        v-for="(field, index) in data.blockData.fields"
-        :key="data.blockData.blockID + index"
+        v-for="(field, field_i) in data.blockData.fields"
+        :key="data.blockData.blockID + field_i"
       >
         <div class="my-2">
           <div v-if="field.type === 'image'">
@@ -40,6 +40,7 @@
           </div>
           <div v-if="field.type === 'object'">
             <EditorJsPanel
+              :blockID="data.blockData.blockID"
               :field="field"
               @display-editorJS-changes="displayEditorJSChanges"
             ></EditorJsPanel>

@@ -1,1 +1,3 @@
-// TODO Talk with Nathan about the new way to use the <script> tag. Instead of adding the <script> tag on the generation lambda, we can just have it in the index.html for the front-end aplication. If application is not in edit mode, just fetch the page, otherwise, start the vue application on edit mode
+// TODO PUt live editor code on GitBucket
+// TODO Side Bar Should have the width static
+// TODO "White cover" when using the lambda on edit mode, fix it. It is coming from the header somehow
