@@ -4,11 +4,11 @@ const scrollToSelectedBlock = (blockID) => {
 
     if(currentlySelectedBlock.length > 0) {
         currentlySelectedBlock[0].classList.remove("currently-selected-block");
-        currentBlock.classList.add("currently-selected-block");
-        currentBlock.scrollIntoView({behavior: "smooth", block: "center"})
+        currentBlock?.classList.add("currently-selected-block");
+        currentBlock?.scrollIntoView({behavior: "smooth", block: "center"})
     } else {
-        currentBlock.classList.add("currently-selected-block");
-        currentBlock.scrollIntoView({behavior: "smooth", block: "center"})
+        currentBlock?.classList.add("currently-selected-block");
+        currentBlock?.scrollIntoView({behavior: "smooth", block: "center"})
     }
 }
 

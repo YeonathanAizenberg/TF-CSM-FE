@@ -1,6 +1,6 @@
 <template>
     <div v-show="isShowSideBar" class="card sidebar-component" >
-    <div v-if="this.isLoading" class="loading"></div>
+        <div v-if="this.isLoading" class="loading"></div>
         <div class="card sidebar-component" v-else>
         <!-- TODO compute the isEditorJS class when open the editor JS on side bar -->
         <!-- <div class="card sidebar-component" :class="isEditorJS ? 'sidebar-componen-for-editor-js' : '' " v-else> -->
@@ -18,7 +18,10 @@
                 :handleFormDataSetUpProp="handleFormDataSetUpProp"
                 :configFile="configFile"
                 :definitionFile="definitionFile"
-                @update-UI-for-new-blocks-order="updateUIForNewBlocksOrder"
+                :selectedPage="selectedPage"
+                :initialTemplate="initialTemplate"
+                :initialTemplateVerison="initialTemplateVerison"
+                @update-UI="updateUI"
                 @make-save-button-available="makeSaveButtonAvailable"
                 @update-config="updateConfig"
                 @selected-block-bridge="selectedBlockBridge"
@@ -90,7 +93,10 @@
             editorsPayload: Array,
             definitionFile: Object,
             isEdited: Boolean,
-            isLoading: Boolean
+            isLoading: Boolean,
+            selectedPage: String,
+            initialTemplate: String,
+            initialTemplateVerison: String,
         },
 
         data: function () {
@@ -105,14 +111,11 @@
             toggleIcon() {
                 return this.isShowSideBar ? "bi-arrow-left" : "bi-arrow-right";
             },
-        // // TODO compute the isEditorJS class when open the editor JS on side bar
-        //     isPanelContainEditorJS() {
-        //         return !!this.data.blockData.fields.find(field => field.type === 'object')
-        //     },
+
         },
         methods: {
-            updateUIForNewBlocksOrder() {
-                this.$emit("update-UI-for-new-blocks-order")
+            updateUI(newBlock) {
+                this.$emit("update-UI", newBlock)
             },
 
             toggleSidebar() {

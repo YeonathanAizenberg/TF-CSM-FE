@@ -3,6 +3,7 @@ const definitionFile = {
     "definitions": [
       {
         "type": "borderText",
+        "name": "borderText",
         "version": "1",
         "image": "	https://app.umso.com/static/media/text.da63c965.svg",
         "inputs": {
@@ -13,6 +14,7 @@ const definitionFile = {
       },
       {
         "type": "imageBox",
+        "name": "imageBox",
         "version": "1",
         "image": "https://app.umso.com/static/media/boxes.2e89739f.svg",
         "inputs": {
@@ -22,6 +24,7 @@ const definitionFile = {
       },
       {
         "type": "editorJS",
+        "name": "editorJS",
         "version": "1",
         "image": "	https://app.umso.com/static/media/titles.aac94caa.svg",
         "inputs": {
@@ -29,17 +32,8 @@ const definitionFile = {
         }
       },
       {
-        "type": "tear",
-        "version": "1",
-        "image": "https://app.umso.com/static/media/stats.7ad48d54.svg",
-        "inputs": {
-          "title": "text",
-          "text": "text",
-          "linkText": "text"
-        }
-      },
-      {
-        "type": "video",
+        "type": "Vidéo",
+        "name": "Vidéo",
         "version": "1",
         "image": "https://app.umso.com/static/media/media.bd15c221.svg",
         "inputs": {
@@ -49,7 +43,8 @@ const definitionFile = {
         }
       },
       {
-        "type": "smalEditor",
+        "type": "SmartEditor2",
+        "name": "Smart Editor 2",
         "version": "1",
         "image": "	https://app.umso.com/static/media/pricing.5e891b16.svg",
         "inputs": {
@@ -60,6 +55,7 @@ const definitionFile = {
       },
       {
         "type": "FAQ",
+        "name": "FAQ",
         "version": "1",
         "image": "https://app.umso.com/static/media/faq.a9407412.svg",
         "inputs": {
@@ -69,7 +65,8 @@ const definitionFile = {
         }
       },
       {
-        "type": "offer",
+        "type": "Offres",
+        "name": "Offres",
         "version": "1",
         "image": "	https://app.umso.com/static/media/feature.ea08bc45.svg",
         "inputs": {
@@ -79,7 +76,8 @@ const definitionFile = {
         }
       },
       {
-        "type": "searchEngine",
+        "type": "MoteurDeRecherche1",
+        "name": "Moteur de recherche 1",
         "version": "1",
         "image": "https://app.umso.com/static/media/features.b14abc4d.svg",
         "inputs": {
@@ -89,25 +87,50 @@ const definitionFile = {
         }
       },
       {
-        "type": "CTA",
-        "version": "1",
-        "image": "	https://app.umso.com/static/media/cta.0f4f3a10.svg",
-        "inputs": {
-          "title": "text",
-          "text": "text",
-          "linkText": "text"
-        }
-      },
-      {
-        "type": "emailCapture",
+        "type": "MoteurDeRecherche2",
+        "name": "Moteur de recherche 2",
         "version": "1",
         "image": "https://app.umso.com/static/media/email.19f53933.svg",
         "inputs": {
-          "title": "text",
-          "text": "text",
-          "linkText": "text"
+          "url": "https://d2g8cl15vz3wxd.cloudfront.net/migdal/page/https://www.travelski.com/la-plagne/916c9c30-389f-491d-8a60-fcf9cb630dcc.png",
         }
-      }
+      },
+      {
+        "type": "CTA1",
+        "name": "CTA 1",
+        "version": "1",
+        "image": "	https://app.umso.com/static/media/cta.0f4f3a10.svg",
+        "inputs": {
+          "none": "none",
+        }
+      },
+      {
+        "type": "CTA2",
+        "name": "CTA 2",
+        "version": "1",
+        "image": "https://app.umso.com/static/media/email.19f53933.svg",
+        "inputs": {
+          "none": "none",
+        }
+      },
+      {
+        "type": "CTA3",
+        "name": "CTA 3",
+        "version": "1",
+        "image": "https://app.umso.com/static/media/email.19f53933.svg",
+        "inputs": {
+          "none": "none",
+        }
+      },
+      {
+        "type": "CTA4",
+        "name": "CTA 4",
+        "version": "1",
+        "image": "https://app.umso.com/static/media/email.19f53933.svg",
+        "inputs": {
+          "none": "none",
+        }
+      },
     ]
   }
 }

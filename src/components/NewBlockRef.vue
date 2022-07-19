@@ -1,11 +1,11 @@
 <template>
-    <div class="new-block-refs-wrapper unable-block" v-if="!['borderText', 'imageBox','editorJS'].includes(type)">
+    <div class="new-block-refs-wrapper unable-block" v-if="!['borderText', 'imageBox','editorJS', 'Moteur de recherche 2'].includes(name)">
         <img :src="image" alt="default">
-        <div>{{type}}</div>
+        <div>{{name}}</div>
     </div>
-    <div class="new-block-refs-wrapper" @click="$emit('add-new-block', type)" v-else>
+    <div class="new-block-refs-wrapper" @click="$emit('add-new-block', name)" v-else>
         <img :src="image" alt="default">
-        <div>{{type}}</div>
+        <div>{{name}}</div>
     </div>
 </template>
 
@@ -15,6 +15,7 @@
 
         props: {
             type: String,
+            name: String,
             image: String,
         },
     };

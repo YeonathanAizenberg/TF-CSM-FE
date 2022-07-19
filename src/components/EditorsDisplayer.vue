@@ -7,7 +7,7 @@
       </button>
       <div class="block-refs-wrapper">
         <div></div>
-        <div>{{ this.editorsPayload[0].blockRefType }}</div>
+        <div>{{ this.editorsPayload[0].name }}</div>
         <div>#{{ this.editorsPayload[0].blockID }}</div>
       </div>
     </div>

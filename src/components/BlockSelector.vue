@@ -10,6 +10,7 @@
       <NewBlockRef
         v-for="definition in definitionFile.data.definitions"
         :key="definition.type"
+        :name="definition.name"
         :type="definition.type"
         :image="definition.image"
         @add-new-block="addNewBlock"
@@ -20,17 +21,17 @@
   <div class="blocks-refs-container" v-else>
     <Draggable 
       animation="400"
-      v-model="this.configFile.data.areas[0].blocks" 
+      v-model="this.configFile.data.areas[0].blocks"
       group="people" 
       @start="drag=true" 
       @end="drag=false" 
-      @update="updateUIForNewBlocksOrder"
+      @update="updateUI"
       item-key="element.id">
       <template #item="{element}">
         <div>
           <div class="block-refs-wrapper clickable" @click="this.handleFormDataSetUp({target:{id:element.id}})">
               <div></div>
-              <div>{{element.type}}</div>
+              <div>{{element.name}}</div>
               <div>#{{element.id}}</div>
           </div>
           <div class="add-new-block-ref-wrapper">
@@ -45,12 +46,9 @@
 </template>
 
 <script>
-import generatePage from "@/lib/generatePage";
 import NewBlockRef from "./NewBlockRef.vue";
 import MainModal from "./MainModal.vue";
-import addClickEventsToBlock from "@/logic/addClickEventsToBlock";
 import Draggable  from "vuedraggable"
-import domParser from '@/utils/domParser.js'
 
 export default {
   name: "BlockSelector",
@@ -64,7 +62,10 @@ export default {
   props: {
     handleFormDataSetUpProp: Function,
     configFile: Object,
-    definitionFile: Object
+    definitionFile: Object,
+    selectedPage: String,
+    initialTemplate: String,
+    initialTemplateVerison: String,
   },
 
   data: function () {
@@ -85,8 +86,8 @@ export default {
   },
 
   methods: {
-    updateUIForNewBlocksOrder(){
-      this.$emit("update-UI-for-new-blocks-order")
+    updateUI(){
+      this.$emit("update-UI")
     },
 
     handleFormDataSetUp(e){
@@ -111,6 +112,7 @@ export default {
               1
           ),
         type: "",
+        name: "",
         version: "1",
         htmlTemplatePath: "",
         cssPath: "",
@@ -118,43 +120,36 @@ export default {
       };
     },
 
-    predareEmptyBlock(type, newBlock) {
+    predareEmptyBlock(name, newBlock) {
       if (!this.definitionFile) return
-      const definition = this.definitionFile.data.definitions.find(definition=>definition.type === type)
+      const definition = this.definitionFile.data.definitions.find(definition=>definition.name === name)
       if (!definition) throw new Error('some error')
       const definitionCopy = JSON.parse(JSON.stringify(definition))
       newBlock.data = definitionCopy.inputs;
       newBlock.type = definitionCopy.type;
-      newBlock.htmlTemplatePath = `../components/${definitionCopy.type}/${definitionCopy.type}.ejs`;
-      newBlock.cssPath = `../components/${definitionCopy.type}/${definitionCopy.type}.scss`;
+      newBlock.name = definitionCopy.name;
+      newBlock.htmlTemplatePath = `../../../../components/${definitionCopy.type}/${definitionCopy.type}.ejs`;
+      newBlock.cssPath = `../../../../components/${definitionCopy.type}/${definitionCopy.type}.scss`;
       return newBlock
     },
 
-    async updateUIwithNewBlock(newBlock) {
+    async pushNewBlock(newBlock) {
       const configFileCopy = JSON.parse(JSON.stringify(this.configFile))
       configFileCopy.data.areas[0].blocks.push(newBlock);
-      const previewHTML = await generatePage("la-plagne", configFileCopy);
-      const previewHTMLPageDom = domParser(previewHTML.data)
-      const previewArea = previewHTMLPageDom.getElementById(
-        newBlock.id
-      ).parentElement;
-      const currentArea = document.getElementById(configFileCopy.data.areas[0].blocks[0].id).parentElement;
 
-      addClickEventsToBlock(previewArea, this.handleFormDataSetUpProp);
       this.$emit("update-config", configFileCopy);
-      this.$emit("make-save-button-available");
-
-      currentArea.replaceWith(previewArea);
     },
 
-    async addNewBlock(type) {
+    async addNewBlock(name) {
       this.state.isModalLoading = true;
 
       const newBlock = this.getEmptyBlock()
-      const preparedBlock = this.predareEmptyBlock(type, newBlock)
+      const preparedBlock = this.predareEmptyBlock(name, newBlock)
 
-      await this.updateUIwithNewBlock(preparedBlock)
+      this.pushNewBlock(preparedBlock)
+      this.$emit("update-UI", newBlock)
       this.handleFormDataSetUp({target:{id:newBlock.id}})
+      this.$emit("make-save-button-available");
 
       this.state.isShowModal = false;
       this.state.isModalLoading = false;
@@ -195,6 +190,7 @@ export default {
       font-size: 14px;
       font-weight: bold;
       color: black;
+      width: max-content;
   }
 
   .block-refs-wrapper div:nth-child(3) {
@@ -219,6 +215,20 @@ export default {
 
   .add-new-block-ref-wrapper:hover .add-new-block-ref{
       display: flex;
+  }
+
+  .add-first-new-block-ref {
+    position: absolute;
+    left: 45%;
+    display: flex;
+    border: 3px solid white;
+    background-color: #dfe5f6;
+    justify-content: center;
+    align-items: self-end;
+    border-radius: 50%;
+    height: 50px;
+    width: 50px;
+    font-size: xx-large;
   }
 
   .add-new-block-ref {
