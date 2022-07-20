@@ -1,5 +1,5 @@
 <template>
-    <div class="new-block-refs-wrapper unable-block" v-if="!['borderText', 'imageBox','editorJS', 'Moteur de recherche 2'].includes(name)">
+    <div class="new-block-refs-wrapper unable-block" v-if="!['Titre', 'Image','Smart Editor 1', 'Moteur de recherche 2', 'CTA 1', 'CTA 4'].includes(name)">
         <img :src="image" alt="default">
         <div>{{name}}</div>
     </div>

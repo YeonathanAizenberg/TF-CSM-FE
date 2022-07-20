@@ -55,9 +55,6 @@
   import ImageEditor from "./editors/ImageEditor.vue";
   import TextEditor from "./editors/TextEditor.vue";
   import EditorJsPanel from "./editors/EditorJsPanel.vue";
-  import generatePage from '@/lib/generatePage';
-  import addClickEventsToBlock  from "@/logic/addClickEventsToBlock";
-  import domParser from '@/utils/domParser.js'
 
   export default {
     name: "EditorsDisplayer",
@@ -121,28 +118,6 @@
         this.$emit("delete-block", this.editorsPayload[0].blockID);
       },
 
-      async swapCurrentAndPreviewAreas() {
-        const previewHTML = await generatePage("la-plagne", this.configFile);
-        const previewHTMLPageDom = domParser(previewHTML.data)
-        const previewArea = previewHTMLPageDom.getElementById(
-          this.data.currentBlock.id
-        ).parentElement;
-
-        let currentArea = document.getElementById(this.data.currentBlock.id).parentElement;
-
-        addClickEventsToBlock(
-          previewArea,
-          this.handleFormDataSetUpProp
-        );
-
-        await new Promise((resolve) => {
-          setTimeout(function () {
-            currentArea.replaceWith(previewArea);
-            resolve();
-          }, 1000);
-        });
-      },
-
       setUpCurrentBlockData(savedDataFromEditorJS) {
         this.data.currentBlock = this.configFile.data.areas[0].blocks.find(block=>block.id === this.data.blockData.blockID)
 
@@ -156,21 +131,18 @@
 
       async updateAreaWithPreview() {
         this.setUpCurrentBlockData()
-
-        this.swapCurrentAndPreviewAreas()
-        
+        this.$emit("update-UI")
         this.$emit("make-save-button-available");
       },
 
       updateImageOnConfig() {
         this.setUpCurrentBlockData()
-
         this.$emit("make-save-button-available")
       },
 
       displayEditorJSChanges(savedDataFromEditorJS){
         this.updateConfigWithNewEditorJSData(savedDataFromEditorJS)
-        this.swapCurrentAndPreviewAreas()
+        this.$emit("update-UI")
       },
 
       updateConfigWithNewEditorJSData(savedDataFromEditorJS) {

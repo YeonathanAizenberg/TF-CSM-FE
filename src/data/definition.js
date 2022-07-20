@@ -3,7 +3,7 @@ const definitionFile = {
     "definitions": [
       {
         "type": "borderText",
-        "name": "borderText",
+        "name": "Titre",
         "version": "1",
         "image": "	https://app.umso.com/static/media/text.da63c965.svg",
         "inputs": {
@@ -14,7 +14,7 @@ const definitionFile = {
       },
       {
         "type": "imageBox",
-        "name": "imageBox",
+        "name": "Image",
         "version": "1",
         "image": "https://app.umso.com/static/media/boxes.2e89739f.svg",
         "inputs": {
@@ -24,7 +24,7 @@ const definitionFile = {
       },
       {
         "type": "editorJS",
-        "name": "editorJS",
+        "name": "Smart Editor 1",
         "version": "1",
         "image": "	https://app.umso.com/static/media/titles.aac94caa.svg",
         "inputs": {

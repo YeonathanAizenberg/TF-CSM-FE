@@ -12,6 +12,7 @@
                 @make-save-button-available="makeSaveButtonAvailable"
                 @delete-block="deleteBlock"
                 @update-config="updateConfig"
+                @update-UI="updateUI"
             ></EditorsDisplayer>
             <BlockSelector
                 v-else
@@ -20,7 +21,7 @@
                 :definitionFile="definitionFile"
                 :selectedPage="selectedPage"
                 :initialTemplate="initialTemplate"
-                :initialTemplateVerison="initialTemplateVerison"
+                :initialTemplateVersion="initialTemplateVersion"
                 @update-UI="updateUI"
                 @make-save-button-available="makeSaveButtonAvailable"
                 @update-config="updateConfig"
@@ -96,7 +97,7 @@
             isLoading: Boolean,
             selectedPage: String,
             initialTemplate: String,
-            initialTemplateVerison: String,
+            initialTemplateVersion: String,
         },
 
         data: function () {

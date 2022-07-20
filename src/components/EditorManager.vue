@@ -11,7 +11,7 @@
       :isEdited="isEdited"
       :selectedPage="data.selectedPage"
       :initialTemplate="data.initialTemplate"
-      :initialTemplateVerison="data.initialTemplateVerison"
+      :initialTemplateVersion="data.initialTemplateVersion"
       @select-block="selectingBlock"
       @update-UI="updateUI"
       @unselect-block="unselectingBlock"
@@ -57,7 +57,7 @@ export default {
         selectedBlockId: "",
         deployedHTMLString: "",
         initialTemplate: "",
-        initialTemplateVerison: "",
+        initialTemplateVersion: "",
         selectedPage: ""
       },
       state: {
@@ -122,7 +122,7 @@ export default {
 
     async saveChangesHandler() {
       this.state.isLoading = true
-      await saveNewPage(this.data.selectedPage, this.data.editedConfigFile, this.data.initialTemplate,this.data.initialTemplateVerison)
+      await saveNewPage(this.data.selectedPage, this.data.editedConfigFile, this.data.initialTemplate,this.data.initialTemplateVersion)
       this.state.isLoading = false
     },
 
@@ -153,18 +153,19 @@ export default {
 
     async updateUI(newBlock){
       this.state.isLoading = true
-      const reOrderedBlocksHTML = await generatePage(this.data.selectedPage, this.data.editedConfigFile, this.data.initialTemplate,this.data.initialTemplateVerison);
+      const reOrderedBlocksHTML = await generatePage(this.data.selectedPage, this.data.editedConfigFile, this.data.initialTemplate,this.data.initialTemplateVersion);
       const reOrderedBlocksHTMLDOM = domParser(reOrderedBlocksHTML.data)
       const generatedAreaOne = reOrderedBlocksHTMLDOM.querySelector("#area1")
       const currentAreaOne = document.querySelector("#area1");
       currentAreaOne.replaceWith(generatedAreaOne);
       const areas = document.getElementById("areas").children;
+      const selectedBlock = generatedAreaOne.querySelector("#"+this.data.selectedBlockId)
 
       for (const area of areas) {
         addClickEventsToBlock(area, this.handleFormDataSetUp);
       }
 
-      this.unselectingBlock()
+      selectedBlock ? this.selectingBlock(selectedBlock) : this.unselectingBlock()
 
       if(newBlock) {
           this.selectingBlock(newBlock)
@@ -205,7 +206,7 @@ export default {
         await getPage(this.data.selectedPage)
       ]);
       this.data.initialTemplate = config.curentTemplate;
-      this.data.initialTemplateVerison = config.curentTemplateVerison;
+      this.data.initialTemplateVersion = config.curentTemplateVersion;
       this.data.initialConfigFile = config.data === "{}" ? {data: {areas: [{blocks: []}]}} : config.data;
       this.data.definitionFile = definition;
       this.data.deployedHTMLString = deployedHTML;

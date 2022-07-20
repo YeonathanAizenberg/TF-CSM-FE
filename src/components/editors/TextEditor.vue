@@ -26,13 +26,14 @@
         data: function () {
             return {
                 // content: this.field.data,
+                timeout: null
             };
         },
 
         watch: {
             field: {
                 handler() {
-                    this.$emit('update-area-with-preview')
+                    this.editText()
                 },
             deep: true,
             },
@@ -44,6 +45,14 @@
 
                 element.style.height = element.scrollHeight + "px";
             },
+
+            editText () {
+                clearTimeout(this.timeout);
+                const self = this;
+                this.timeout = setTimeout(function () {
+                    self.$emit('update-area-with-preview');
+                }, 1000);
+            }
         },
 
         mounted() { 

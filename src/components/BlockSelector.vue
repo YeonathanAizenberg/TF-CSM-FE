@@ -65,7 +65,7 @@ export default {
     definitionFile: Object,
     selectedPage: String,
     initialTemplate: String,
-    initialTemplateVerison: String,
+    initialTemplateVersion: String,
   },
 
   data: function () {
